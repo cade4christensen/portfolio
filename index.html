@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cade Christensen — CS Student & Developer</title>
+<title>Cade Christensen — Software Engineer</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -399,6 +399,13 @@
   .tech-cpp     { background: #1e1a3a; color: #c084fc; border: 1px solid #3a2d61; }
   .tech-html    { background: #2a1a00; color: #fb923c; border: 1px solid #4a3000; }
   .tech-net     { background: #1a1e3a; color: #60a5fa; border: 1px solid #1e2d61; }
+  .tech-py      { background: #0b1f33; color: #60a5fa; border: 1px solid #1e3a5f; }
+  .tech-ts      { background: #0b1a33; color: #7dd3fc; border: 1px solid #1e3a6f; }
+  .tech-three   { background: #1a1a1a; color: #e4e4e7; border: 1px solid #3a3a3a; }
+  .tech-cf      { background: #2a1200; color: #f97316; border: 1px solid #4a2200; }
+  .tech-php     { background: #2a0a14; color: #fb7185; border: 1px solid #4a1a2a; }
+  .project-card-static:hover { transform: none; border-color: var(--border); }
+  .project-card-static .project-link { color: var(--muted); }
   .project-link {
     display: inline-flex;
     align-items: center;
@@ -598,6 +605,68 @@
   .reveal-delay-2 { transition-delay: 0.2s; }
   .reveal-delay-3 { transition-delay: 0.3s; }
 
+  /* ── Pixel field background ── */
+  #pixels {
+    position: fixed; inset: 0; z-index: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    opacity: 0.9;
+  }
+
+  /* ── Chat widget ── */
+  #chat-toggle {
+    position: fixed; right: 24px; bottom: 24px; z-index: 200;
+    width: 56px; height: 56px; border-radius: 50%; border: 0;
+    background: var(--grad); color: #fff; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 10px 30px rgba(147,51,234,0.35);
+    transition: transform 0.2s;
+  }
+  #chat-toggle:hover { transform: translateY(-2px) scale(1.04); }
+  #chat-panel {
+    position: fixed; right: 24px; bottom: 92px; z-index: 200;
+    width: 360px; max-width: calc(100vw - 32px); height: 480px; max-height: calc(100vh - 120px);
+    background: rgba(15,15,20,0.96); backdrop-filter: blur(16px);
+    border: 1px solid var(--border); border-radius: 16px;
+    display: none; flex-direction: column; overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+  #chat-panel.open { display: flex; }
+  .chat-head {
+    padding: 14px 16px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .chat-head-title { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 15px; }
+  .chat-head-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .chat-close { background: none; border: 0; color: var(--muted); cursor: pointer; font-size: 18px; line-height: 1; }
+  .chat-close:hover { color: var(--text); }
+  .chat-log { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .chat-msg {
+    max-width: 85%; padding: 10px 13px; border-radius: 12px;
+    font-size: 14px; line-height: 1.5; white-space: pre-wrap; word-wrap: break-word;
+  }
+  .chat-msg.user { align-self: flex-end; background: var(--purple); color: #fff; border-bottom-right-radius: 4px; }
+  .chat-msg.bot  { align-self: flex-start; background: var(--bg3); color: var(--text); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+  .chat-msg.err  { align-self: flex-start; color: #f87171; font-size: 13px; }
+  .chat-msg.typing { color: var(--muted); font-style: italic; }
+  .chat-suggest { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 16px 10px; }
+  .chat-suggest button {
+    background: transparent; border: 1px solid var(--border); color: var(--muted);
+    border-radius: 999px; padding: 5px 10px; font-size: 12px; cursor: pointer; font-family: inherit;
+  }
+  .chat-suggest button:hover { border-color: var(--purple); color: var(--text); }
+  .chat-form { display: flex; gap: 8px; padding: 12px; border-top: 1px solid var(--border); }
+  .chat-form input {
+    flex: 1; background: var(--bg); border: 1px solid var(--border); color: var(--text);
+    border-radius: 10px; padding: 10px 12px; font-size: 14px; font-family: inherit; outline: none;
+  }
+  .chat-form input:focus { border-color: var(--purple); }
+  .chat-form button {
+    background: var(--grad); border: 0; color: #fff; border-radius: 10px;
+    padding: 0 14px; font-weight: 600; cursor: pointer; font-family: inherit;
+  }
+  .chat-form button:disabled { opacity: 0.5; cursor: default; }
+
   /* ── Responsive ── */
   @media (max-width: 768px) {
     nav { padding: 16px 20px; }
@@ -612,10 +681,14 @@
     .edu-card { grid-template-columns: 1fr; }
     .skills-list { grid-template-columns: 1fr; }
     footer { flex-direction: column; gap: 8px; text-align: center; }
+    #chat-toggle { right: 16px; bottom: 16px; }
+    #chat-panel { right: 16px; bottom: 84px; height: 70vh; }
   }
 </style>
 </head>
 <body>
+
+<canvas id="pixels" aria-hidden="true"></canvas>
 
 <!-- ── Nav ── -->
 <nav>
@@ -639,7 +712,7 @@
           <span class="line1">Cade</span>
           <span class="line2">Christensen</span>
         </h1>
-        <p class="hero-subtitle">CS Student at the University of Utah, building real software and looking for internships where I can do the same.</p>
+        <p class="hero-subtitle">Software Engineering Intern at dbS Productions and CS student at the University of Utah. I build geospatial tooling, web apps, and the occasional frog.</p>
         <div class="hero-btns">
           <a class="btn-primary" href="mailto:cadeachristensen@gmail.com">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
@@ -648,6 +721,10 @@
           <a class="btn-outline" href="https://github.com/cade4christensen" target="_blank" rel="noopener">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0 0 22 12.017C22 6.484 17.522 2 12 2z"/></svg>
             GitHub
+          </a>
+          <a class="btn-outline" href="https://cade.work" target="_blank" rel="noopener">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            cade.work
           </a>
           <a class="btn-outline" href="https://docs.google.com/document/d/1Pmk3UHqvAf6tBqVRxLBQyllDxft1SfVen-CpoM2I6Eo/export?format=pdf" target="_blank" rel="noopener">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 18 15 15"/></svg>
@@ -676,80 +753,73 @@
     <div class="skills-list">
 
       <div class="skill-row reveal">
-        <div class="skill-icon-box" style="background:#1d0a2e;color:#c084fc;font-size:12px;">C#</div>
-        <div class="skill-info"><div class="skill-name">C#</div><div class="skill-type">Language</div></div>
+        <div class="skill-icon-box" style="background:#0b1f33;color:#60a5fa;font-size:12px;">Py</div>
+        <div class="skill-info"><div class="skill-name">Python</div><div class="skill-type">Language</div></div>
       </div>
 
       <div class="skill-row reveal reveal-delay-1">
-        <div class="skill-icon-box" style="background:#2a1400;font-size:22px;">☕</div>
-        <div class="skill-info"><div class="skill-name">Java</div><div class="skill-type">Language</div></div>
+        <div class="skill-icon-box" style="background:#0b1a33;color:#7dd3fc;font-size:12px;">TS</div>
+        <div class="skill-info"><div class="skill-name">TypeScript</div><div class="skill-type">Language</div></div>
       </div>
 
       <div class="skill-row reveal">
-        <div class="skill-icon-box" style="background:#001a30;color:#60a5fa;font-size:11px;">C++</div>
-        <div class="skill-info"><div class="skill-name">C++</div><div class="skill-type">Language</div></div>
-      </div>
-
-      <div class="skill-row reveal reveal-delay-1">
         <div class="skill-icon-box" style="background:#2a2000;color:#fbbf24;font-size:12px;">JS</div>
         <div class="skill-info"><div class="skill-name">JavaScript</div><div class="skill-type">Language</div></div>
       </div>
 
+      <div class="skill-row reveal reveal-delay-1">
+        <div class="skill-icon-box" style="background:#1d0a2e;color:#c084fc;font-size:12px;">C#</div>
+        <div class="skill-info"><div class="skill-name">C#</div><div class="skill-type">Language</div></div>
+      </div>
+
       <div class="skill-row reveal">
-        <div class="skill-icon-box" style="background:#2a0e00;color:#fb923c;font-size:11px;">&lt;/&gt;</div>
-        <div class="skill-info"><div class="skill-name">HTML</div><div class="skill-type">Markup</div></div>
+        <div class="skill-icon-box" style="background:#2a1400;color:#fb923c;font-size:22px;">☕</div>
+        <div class="skill-info"><div class="skill-name">Java</div><div class="skill-type">Language</div></div>
       </div>
 
       <div class="skill-row reveal reveal-delay-1">
-        <div class="skill-icon-box" style="background:#001040;color:#818cf8;font-size:13px;">{ }</div>
-        <div class="skill-info"><div class="skill-name">CSS</div><div class="skill-type">Styling</div></div>
+        <div class="skill-icon-box" style="background:#001a30;color:#60a5fa;font-size:11px;">C++</div>
+        <div class="skill-info"><div class="skill-name">C++</div><div class="skill-type">Language</div></div>
       </div>
 
       <div class="skill-row reveal">
-        <div class="skill-icon-box" style="background:#160030;color:#a78bfa;">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
-            <path d="M12 3C10.5 6 8 8.5 8 11.5a4 4 0 0 0 8 0C16 8.5 13.5 6 12 3zm0 10a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3z"/>
-          </svg>
-        </div>
-        <div class="skill-info"><div class="skill-name">Blazor</div><div class="skill-type">Framework</div></div>
+        <div class="skill-icon-box" style="background:#001820;color:#22d3ee;font-size:11px;">SQL</div>
+        <div class="skill-info"><div class="skill-name">SQL / Postgres</div><div class="skill-type">Database</div></div>
       </div>
 
       <div class="skill-row reveal reveal-delay-1">
-        <div class="skill-icon-box" style="background:#001820;color:#22d3ee;">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5">
-            <ellipse cx="12" cy="7" rx="8" ry="3"/>
-            <path d="M4 7v5c0 1.66 3.58 3 8 3s8-1.34 8-3V7"/>
-            <path d="M4 12v5c0 1.66 3.58 3 8 3s8-1.34 8-3v-5"/>
-          </svg>
-        </div>
-        <div class="skill-info"><div class="skill-name">SQL</div><div class="skill-type">Database</div></div>
+        <div class="skill-icon-box" style="background:#032a1e;color:#34d399;font-size:12px;">Dj</div>
+        <div class="skill-info"><div class="skill-name">Django</div><div class="skill-type">Framework</div></div>
       </div>
 
       <div class="skill-row reveal">
-        <div class="skill-icon-box" style="background:#002010;color:#4ade80;font-size:14px;">{}</div>
-        <div class="skill-info"><div class="skill-name">JSON</div><div class="skill-type">Data Format</div></div>
+        <div class="skill-icon-box" style="background:#001a2a;color:#67e8f9;font-size:22px;">⚛</div>
+        <div class="skill-info"><div class="skill-name">React</div><div class="skill-type">Framework</div></div>
       </div>
 
       <div class="skill-row reveal reveal-delay-1">
-        <div class="skill-icon-box" style="background:#200010;color:#f87171;font-size:10px;letter-spacing:-0.05em;">ASM</div>
-        <div class="skill-info"><div class="skill-name">Assembly</div><div class="skill-type">Language</div></div>
+        <div class="skill-icon-box" style="background:#1a1a1a;color:#e4e4e7;font-size:12px;">3D</div>
+        <div class="skill-info"><div class="skill-name">Three.js</div><div class="skill-type">3D / WebGL</div></div>
       </div>
 
       <div class="skill-row reveal">
-        <div class="skill-icon-box" style="background:#2a0800;color:#f97316;">
-          <svg viewBox="0 0 24 24" width="22" height="22">
-            <circle cx="12" cy="5" r="2.5" fill="currentColor"/>
-            <circle cx="6" cy="19" r="2.5" fill="currentColor"/>
-            <circle cx="18" cy="19" r="2.5" fill="currentColor"/>
-            <path d="M12 7.5v5M12 12.5Q12 19 6 19M12 12.5Q12 19 18 19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-          </svg>
-        </div>
+        <div class="skill-icon-box" style="background:#0f2a0f;color:#4ade80;font-size:22px;">◎</div>
+        <div class="skill-info"><div class="skill-name">Geospatial (shapely · pyproj · rasterio)</div><div class="skill-type">Python stack</div></div>
+      </div>
+
+      <div class="skill-row reveal reveal-delay-1">
+        <div class="skill-icon-box" style="background:#2a1200;color:#f97316;font-size:12px;">CF</div>
+        <div class="skill-info"><div class="skill-name">Cloudflare Workers</div><div class="skill-type">Deployment</div></div>
+      </div>
+
+      <div class="skill-row reveal">
+        <div class="skill-icon-box" style="background:#200010;color:#f87171;font-size:11px;">git</div>
         <div class="skill-info"><div class="skill-name">Git</div><div class="skill-type">Version Control</div></div>
       </div>
 
       <div class="skill-row reveal reveal-delay-1">
-        <div class="skill-icon-box" style="background:#001830;color:#38bdf8;font-size:11px;letter-spacing:-0.03em;">&gt; _</div>
-        <div class="skill-info"><div class="skill-name">VS Code</div><div class="skill-type">IDE</div></div>
+        <div class="skill-icon-box" style="background:#2a0a14;color:#fb7185;font-size:12px;">L</div>
+        <div class="skill-info"><div class="skill-name">Laravel / PHP</div><div class="skill-type">Framework</div></div>
       </div>
 
     </div>
@@ -763,10 +833,70 @@
     <h2 class="section-title">Featured <span>Projects</span></h2>
     <div class="projects-grid">
 
-      <a class="project-card reveal" href="https://github.com/cade4christensen/Snake-Game" target="_blank" rel="noopener">
+      <a class="project-card reveal" href="https://cade.work" target="_blank" rel="noopener">
         <div class="project-number">01</div>
+        <div class="project-name">cade.work</div>
+        <p class="project-desc">A one-page personal site with a 3D frog that actually lives in it: it climbs the walls, perches on the name, jumps between ledges and falls asleep when you leave it alone. Ortho camera, dot-grid rendering, all frog behavior written from scratch.</p>
+        <div class="project-tech">
+          <span class="tech-tag tech-ts">TypeScript</span>
+          <span class="tech-tag tech-three">Three.js</span>
+          <span class="tech-tag tech-cf">Cloudflare</span>
+        </div>
+        <span class="project-link">Visit cade.work →</span>
+      </a>
+
+      <a class="project-card reveal reveal-delay-1" href="https://github.com/cade4christensen/Geo-Analyzer" target="_blank" rel="noopener">
+        <div class="project-number">02</div>
+        <div class="project-name">Geo Analyzer</div>
+        <p class="project-desc">Turn a latitude/longitude into search-planning data: distance to the nearest road, trail, railroad, utility line and water; the surface at that point; and a population class. OSM, NLCD land cover and TIGER roads behind a Streamlit UI and a batch CLI.</p>
+        <div class="project-tech">
+          <span class="tech-tag tech-py">Python</span>
+          <span class="tech-tag tech-py">Shapely</span>
+          <span class="tech-tag tech-py">Streamlit</span>
+        </div>
+        <span class="project-link">View on GitHub →</span>
+      </a>
+
+      <div class="project-card project-card-static reveal reveal-delay-2">
+        <div class="project-number">03</div>
+        <div class="project-name">ADS-B Search & Rescue Pipeline</div>
+        <p class="project-desc">Automated a six-step aviation SAR research checklist at dbS Productions: parse 400+ AFRCC workbooks, match tail numbers to NTSB cases, scrape flight tracks from dockets and ADS-B Exchange, and compute last-known-position metrics for a published book chapter.</p>
+        <div class="project-tech">
+          <span class="tech-tag tech-py">Python</span>
+          <span class="tech-tag tech-py">pandas</span>
+          <span class="tech-tag tech-html">37 tests</span>
+        </div>
+        <span class="project-link">Internship work · private repo</span>
+      </div>
+
+      <a class="project-card reveal" href="https://github.com/cade4christensen/Jormunvector" target="_blank" rel="noopener">
+        <div class="project-number">04</div>
+        <div class="project-name">Jormunvector</div>
+        <p class="project-desc">A browser vector-drawing editor built on Canvas: line, Bézier, freehand (with RDP simplification), ellipse and rectangle tools, node-level editing, stroke expansion with tapers and caps, and text prompts that generate shapes.</p>
+        <div class="project-tech">
+          <span class="tech-tag tech-js">JavaScript</span>
+          <span class="tech-tag tech-html">Canvas</span>
+          <span class="tech-tag tech-js">Vite</span>
+        </div>
+        <span class="project-link">View on GitHub →</span>
+      </a>
+
+      <a class="project-card reveal reveal-delay-1" href="https://github.com/cade4christensen/own-it" target="_blank" rel="noopener">
+        <div class="project-number">05</div>
+        <div class="project-name">Own It</div>
+        <p class="project-desc">A live training game on accountability. Players join from their phones, rewrite a workplace excuse anonymously each round, and the room votes. Host view, projector view with QR code, podium at the end. No logins, just a polling API.</p>
+        <div class="project-tech">
+          <span class="tech-tag tech-php">PHP</span>
+          <span class="tech-tag tech-php">Laravel</span>
+          <span class="tech-tag tech-net">SQL</span>
+        </div>
+        <span class="project-link">View on GitHub →</span>
+      </a>
+
+      <a class="project-card reveal reveal-delay-2" href="https://github.com/cade4christensen/Snake-Game" target="_blank" rel="noopener">
+        <div class="project-number">06</div>
         <div class="project-name">Snake Game</div>
-        <p class="project-desc">A full-stack, real-time multiplayer Snake game. Features persistent high-score tracking backed by a database, live player connections, and a polished game client.</p>
+        <p class="project-desc">A full-stack, real-time multiplayer Snake game with persistent high-score tracking backed by a database, live player connections, and a polished game client.</p>
         <div class="project-tech">
           <span class="tech-tag tech-csharp">C#</span>
           <span class="tech-tag tech-net">.NET</span>
@@ -774,20 +904,20 @@
         <span class="project-link">View on GitHub →</span>
       </a>
 
-      <a class="project-card reveal reveal-delay-1" href="https://github.com/cade4christensen/Spreadsheet" target="_blank" rel="noopener">
-        <div class="project-number">02</div>
+      <a class="project-card reveal" href="https://github.com/cade4christensen/Spreadsheet" target="_blank" rel="noopener">
+        <div class="project-number">07</div>
         <div class="project-name">Spreadsheet App</div>
         <p class="project-desc">A browser-based spreadsheet with dynamic formula evaluation, cell dependency tracking, data serialization, and an interactive interface — built end to end.</p>
         <div class="project-tech">
           <span class="tech-tag tech-csharp">C#</span>
           <span class="tech-tag tech-net">.NET</span>
-          <span class="tech-tag tech-html">HTML/CSS</span>
+          <span class="tech-tag tech-html">Blazor</span>
         </div>
         <span class="project-link">View on GitHub →</span>
       </a>
 
-      <a class="project-card reveal reveal-delay-2" href="https://github.com/cade4christensen/Disjoint-Grove" target="_blank" rel="noopener">
-        <div class="project-number">03</div>
+      <a class="project-card reveal reveal-delay-1" href="https://github.com/cade4christensen/Disjoint-Grove" target="_blank" rel="noopener">
+        <div class="project-number">08</div>
         <div class="project-name">Disjoint Grove</div>
         <p class="project-desc">An original data structure project — a creative implementation exploring efficient union-find operations, written in Java with a focus on algorithmic correctness and clean design.</p>
         <div class="project-tech">
@@ -810,6 +940,7 @@
         <div class="edu-school">University of Utah</div>
         <div class="edu-degree">B.S. Computer Science</div>
         <ul class="edu-highlights">
+          <li>Software Engineering Intern at dbS Productions — geospatial and data pipelines for search-and-rescue research</li>
           <li>Full-stack development — networked systems, databases, client-server architecture</li>
           <li>Software engineering principles — design patterns, testing, scalability</li>
           <li>Core CS theory — data structures, algorithms, computability</li>
@@ -862,7 +993,190 @@
   <span class="footer-text">Built by hand — Salt Lake City, UT</span>
 </footer>
 
+<!-- ── Chat widget ── -->
+<button id="chat-toggle" aria-label="Ask about Cade" aria-expanded="false">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+</button>
+<div id="chat-panel" role="dialog" aria-label="Chat about Cade">
+  <div class="chat-head">
+    <div>
+      <div class="chat-head-title">Ask about Cade</div>
+      <div class="chat-head-sub">A small bot that knows his projects. Powered by Gemini.</div>
+    </div>
+    <button class="chat-close" aria-label="Close chat">×</button>
+  </div>
+  <div class="chat-log" id="chat-log">
+    <div class="chat-msg bot">Hi! Ask me anything about Cade's work, skills, or how to get in touch.</div>
+  </div>
+  <div class="chat-suggest">
+    <button>What is he working on now?</button>
+    <button>Tell me about the frog site</button>
+    <button>What languages does he use?</button>
+  </div>
+  <form class="chat-form" id="chat-form" autocomplete="off">
+    <input id="chat-input" type="text" maxlength="500" placeholder="Ask a question…" aria-label="Your question">
+    <button type="submit" id="chat-send">Send</button>
+  </form>
+</div>
+
 <script>
+  // ── Pixel field: colonies that spread like a virus, then retract ──
+  (() => {
+    const canvas = document.getElementById('pixels')
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (!canvas || reduce) { if (canvas) canvas.remove(); return }
+    const ctx = canvas.getContext('2d')
+    const CELL = 10
+    let cols = 0, rows = 0, dpr = 1
+    let owner = null      // Int16Array: colony id per cell (-1 = empty)
+    const colonies = []
+    const PALETTE = [[147,51,234],[232,121,249],[99,102,241],[192,132,252]]
+    const TARGET = () => Math.max(4, Math.min(9, Math.round((cols * rows) / 6000)))
+
+    function resize() {
+      dpr = Math.min(window.devicePixelRatio || 1, 2)
+      canvas.width = Math.floor(innerWidth * dpr); canvas.height = Math.floor(innerHeight * dpr)
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+      cols = Math.ceil(innerWidth / CELL); rows = Math.ceil(innerHeight / CELL)
+      owner = new Int16Array(cols * rows).fill(-1)
+      colonies.length = 0
+    }
+
+    function spawn() {
+      const id = colonies.length
+      const x = Math.floor(Math.random() * cols), y = Math.floor(Math.random() * rows)
+      const col = PALETTE[Math.floor(Math.random() * PALETTE.length)]
+      const c = { id, cells: [], phase: 'grow', limit: 60 + Math.floor(Math.random() * 260),
+                  speed: 1 + Math.random() * 3, color: col, alpha: 0, hold: 0,
+                  dirBias: Math.random() * Math.PI * 2 }
+      const idx = y * cols + x
+      if (owner[idx] !== -1) return
+      owner[idx] = id; c.cells.push(idx)
+      colonies.push(c)
+    }
+
+    function step() {
+      const alive = colonies.filter(c => c.phase !== 'dead')
+      if (alive.length < TARGET()) spawn()
+      for (const c of colonies) {
+        if (c.phase === 'dead') continue
+        c.alpha += (c.phase === 'retract' ? -0.012 : 0.02)
+        c.alpha = Math.max(0, Math.min(0.55, c.alpha))
+        if (c.phase === 'grow') {
+          let tries = Math.ceil(c.speed)
+          while (tries-- > 0 && c.cells.length < c.limit) {
+            // bias toward recently-added cells so growth looks like tendrils
+            const tipBias = Math.random() < 0.7
+            const src = c.cells[tipBias ? c.cells.length - 1 - Math.floor(Math.random() * Math.min(8, c.cells.length)) : Math.floor(Math.random() * c.cells.length)]
+            const sx = src % cols, sy = (src - sx) / cols
+            const ang = Math.random() < 0.6 ? c.dirBias + (Math.random() - 0.5) * 1.2 : Math.random() * Math.PI * 2
+            const dx = Math.round(Math.cos(ang)), dy = Math.round(Math.sin(ang))
+            const nx = sx + dx, ny = sy + dy
+            if (nx < 0 || ny < 0 || nx >= cols || ny >= rows) continue
+            const ni = ny * cols + nx
+            if (owner[ni] !== -1) continue
+            owner[ni] = c.id; c.cells.push(ni)
+          }
+          if (c.cells.length >= c.limit) { c.phase = 'hold'; c.hold = 20 + Math.floor(Math.random() * 60) }
+        } else if (c.phase === 'hold') {
+          if (--c.hold <= 0) c.phase = 'retract'
+          if (Math.random() < 0.3) c.dirBias += (Math.random() - 0.5)
+        } else if (c.phase === 'retract') {
+          let n = Math.ceil(c.speed * 1.5)
+          while (n-- > 0 && c.cells.length) { owner[c.cells.pop()] = -1 }
+          if (!c.cells.length) c.phase = 'dead'
+        }
+      }
+      // compact dead colonies occasionally
+      if (colonies.length > 40 && colonies.every(c => c.phase === 'dead' || c.id < 40)) {
+        // ids are stored in owner[]; rebuild to keep ids small
+        const live = colonies.filter(c => c.phase !== 'dead')
+        owner.fill(-1); colonies.length = 0
+        live.forEach((c, i) => { c.id = i; colonies.push(c); for (const ci of c.cells) owner[ci] = i })
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, innerWidth, innerHeight)
+      for (const c of colonies) {
+        if (c.phase === 'dead' || c.alpha <= 0) continue
+        const [r, g, b] = c.color
+        const n = c.cells.length
+        for (let i = 0; i < n; i++) {
+          const idx = c.cells[i]
+          const x = idx % cols, y = (idx - x) / cols
+          // tips glow a bit brighter
+          const a = c.alpha * (0.45 + 0.55 * (i / n))
+          ctx.fillStyle = `rgba(${r},${g},${b},${a})`
+          ctx.fillRect(x * CELL + 1, y * CELL + 1, CELL - 2, CELL - 2)
+        }
+      }
+    }
+
+    let last = 0
+    function loop(t) {
+      if (t - last > 70) { step(); draw(); last = t }
+      requestAnimationFrame(loop)
+    }
+    resize()
+    let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(resize, 150) })
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) last = 0 })
+    requestAnimationFrame(loop)
+  })()
+
+  // ── Chat widget ──
+  (() => {
+    const CHAT_URL = 'https://portfolio-chat.frog-site.workers.dev/chat'
+    const toggle = document.getElementById('chat-toggle')
+    const panel = document.getElementById('chat-panel')
+    const log = document.getElementById('chat-log')
+    const form = document.getElementById('chat-form')
+    const input = document.getElementById('chat-input')
+    const send = document.getElementById('chat-send')
+    const suggest = panel.querySelector('.chat-suggest')
+    const history = []
+
+    function setOpen(open) {
+      panel.classList.toggle('open', open)
+      toggle.setAttribute('aria-expanded', String(open))
+      if (open) setTimeout(() => input.focus(), 50)
+    }
+    toggle.addEventListener('click', () => setOpen(!panel.classList.contains('open')))
+    panel.querySelector('.chat-close').addEventListener('click', () => setOpen(false))
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') setOpen(false) })
+
+    function add(text, cls) {
+      const el = document.createElement('div')
+      el.className = 'chat-msg ' + cls
+      el.textContent = text
+      log.appendChild(el)
+      log.scrollTop = log.scrollHeight
+      return el
+    }
+
+    async function ask(q) {
+      q = q.trim(); if (!q) return
+      suggest.style.display = 'none'
+      add(q, 'user'); history.push({ role: 'user', content: q })
+      input.value = ''; send.disabled = true
+      const typing = add('thinking…', 'bot typing')
+      try {
+        const res = await fetch(CHAT_URL, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: history.slice(-12) }),
+        })
+        const data = await res.json().catch(() => ({}))
+        typing.remove()
+        if (!res.ok || !data.reply) { add(data.error || 'Something went wrong. Try again.', 'err'); history.pop(); return }
+        add(data.reply, 'bot'); history.push({ role: 'assistant', content: data.reply })
+      } catch {
+        typing.remove(); add('Could not reach the chat service.', 'err'); history.pop()
+      } finally { send.disabled = false; input.focus() }
+    }
+    form.addEventListener('submit', e => { e.preventDefault(); ask(input.value) })
+    suggest.querySelectorAll('button').forEach(b => b.addEventListener('click', () => ask(b.textContent)))
+  })()
+
   // Scroll-triggered reveal
   const observer = new IntersectionObserver(entries => {
     entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible') })

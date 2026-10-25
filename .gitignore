@@ -1,0 +1,4 @@
+.claude/
+chat-worker/node_modules/
+chat-worker/.wrangler/
+chat-worker/.dev.vars
