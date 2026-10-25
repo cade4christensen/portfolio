@@ -62,7 +62,7 @@ export default {
     }))
     if (contents[contents.length - 1].role !== 'user') return json({ error: 'Last message must be from the user' }, 400, h)
 
-    const model = env.GEMINI_MODEL || 'gemini-2.5-flash-lite'
+    const model = env.GEMINI_MODEL || 'gemini-3.5-flash-lite'
     const upstream = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
       {
