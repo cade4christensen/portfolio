@@ -1026,12 +1026,12 @@
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (!canvas || reduce) { if (canvas) canvas.remove(); return }
     const ctx = canvas.getContext('2d')
-    const CELL = 10
+    const CELL = 8
     let cols = 0, rows = 0, dpr = 1
     let owner = null      // Int16Array: colony id per cell (-1 = empty)
     const colonies = []
     const PALETTE = [[147,51,234],[232,121,249],[99,102,241],[192,132,252]]
-    const TARGET = () => Math.max(4, Math.min(9, Math.round((cols * rows) / 6000)))
+    const TARGET = () => Math.max(4, Math.min(12, Math.round((cols * rows) / 4500)))
 
     function resize() {
       dpr = Math.min(window.devicePixelRatio || 1, 2)
@@ -1046,7 +1046,7 @@
       const id = colonies.length
       const x = Math.floor(Math.random() * cols), y = Math.floor(Math.random() * rows)
       const col = PALETTE[Math.floor(Math.random() * PALETTE.length)]
-      const c = { id, cells: [], phase: 'grow', limit: 60 + Math.floor(Math.random() * 260),
+      const c = { id, cells: [], phase: 'grow', limit: 50 + Math.floor(Math.random() * 230),
                   speed: 1 + Math.random() * 3, color: col, alpha: 0, hold: 0,
                   dirBias: Math.random() * Math.PI * 2 }
       const idx = y * cols + x
@@ -1057,11 +1057,11 @@
 
     function step() {
       const alive = colonies.filter(c => c.phase !== 'dead')
-      if (alive.length < TARGET()) spawn()
+      if (alive.length < TARGET() && Math.random() < 0.5) spawn()
       for (const c of colonies) {
         if (c.phase === 'dead') continue
-        c.alpha += (c.phase === 'retract' ? -0.012 : 0.02)
-        c.alpha = Math.max(0, Math.min(0.55, c.alpha))
+        c.alpha += (c.phase === 'retract' ? -0.015 : 0.03)
+        c.alpha = Math.max(0, Math.min(0.42, c.alpha))
         if (c.phase === 'grow') {
           let tries = Math.ceil(c.speed)
           while (tries-- > 0 && c.cells.length < c.limit) {
@@ -1113,19 +1113,23 @@
       }
     }
 
+    const STEP_MS = 55
     let last = 0
     function loop(t) {
-      if (t - last > 70) { step(); draw(); last = t }
+      if (!last) last = t
+      let n = Math.min(6, Math.floor((t - last) / STEP_MS))
+      if (n > 0) { while (n-- > 0) step(); draw(); last = t }
       requestAnimationFrame(loop)
     }
     resize()
-    let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(resize, 150) })
+    for (let i = 0; i < 160; i++) step()   // start populated instead of empty
+    let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { resize(); for (let i = 0; i < 160; i++) step() }, 150) })
     document.addEventListener('visibilitychange', () => { if (!document.hidden) last = 0 })
     requestAnimationFrame(loop)
-  })()
+  })();
 
   // ── Chat widget ──
-  (() => {
+  ;(() => {
     const CHAT_URL = 'https://portfolio-chat.frog-site.workers.dev/chat'
     const toggle = document.getElementById('chat-toggle')
     const panel = document.getElementById('chat-panel')
@@ -1175,7 +1179,7 @@
     }
     form.addEventListener('submit', e => { e.preventDefault(); ask(input.value) })
     suggest.querySelectorAll('button').forEach(b => b.addEventListener('click', () => ask(b.textContent)))
-  })()
+  })();
 
   // Scroll-triggered reveal
   const observer = new IntersectionObserver(entries => {
