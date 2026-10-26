@@ -1074,12 +1074,14 @@
         const last = trip.trail[trip.trail.length - 1]
         if (!last || last[0] !== cx || last[1] !== cy) trip.trail.push([cx, cy, now])
       }
-      // each cell of the path fades on its own clock, oldest first; nothing is ever cut off
-      const FADE = 9000
-      while (trip.trail.length && now - trip.trail[0][2] > FADE) trip.trail.shift()
+      // the tail erases itself the same way the head drew it: each cell lives LIFE ms after it was
+      // drawn, then dissolves over DISSOLVE ms, so the path retracts from its origin at the pixel's pace
+      const LIFE = 5000, DISSOLVE = 900
+      while (trip.trail.length && now - trip.trail[0][2] > LIFE + DISSOLVE) trip.trail.shift()
       for (let i = 0; i < trip.trail.length; i++) {
-        const age = (now - trip.trail[i][2]) / FADE
-        const a = 0.28 * (1 - age) * (1 - age)
+        const age = now - trip.trail[i][2]
+        const k = age < LIFE ? 1 : 1 - (age - LIFE) / DISSOLVE
+        const a = 0.26 * k
         ctx.fillStyle = `rgba(232,121,249,${a})`
         ctx.fillRect(ox + trip.trail[i][0] * cell + 1, oy + trip.trail[i][1] * cell + 1, g, g)
       }
