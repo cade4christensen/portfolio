@@ -1131,130 +1131,124 @@
     requestAnimationFrame(loop)
   })();
 
-  // ── Foreground infection: fast, bright, and it gets out of the way of whatever you're reading ──
+  // ── Foreground infection: big chunky pixels of wildly varying size, fast, that clear off the section you're reading ──
   ;(() => {
     const canvas = document.getElementById('infection')
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (!canvas || reduce) { if (canvas) canvas.remove(); return }
     const ctx = canvas.getContext('2d')
-    const CELL = 6
-    const STEP_MS = 28                 // ~35 steps/s
-    const MAX_CELLS = 5000
-    const PALETTE = [[232,121,249],[192,132,252],[147,51,234],[129,140,248]]
-    let cols = 0, rows = 0, dpr = 1, owner = null
+    const STEP_MS = 30
+    const GRID = 4                    // everything snaps to this
+    const MIN_S = 4, MAX_S = 128       // chunk sizes (px); log-uniform so most are small, some are huge
+    const MAX_CHUNKS = 2600
+    const PALETTE = [[232,121,249],[192,132,252],[147,51,234],[129,140,248],[244,114,182]]
+    let W = 0, H = 0, dpr = 1
     const colonies = []
-    let totalCells = 0
+    let total = 0
 
-    // Things the infection must not cover once they are in view.
-    const guarded = [...document.querySelectorAll('nav, #hero .hero-inner, #skills .container, #projects .container, #education .container, #contact .container, #chat-panel, #chat-toggle')]
-      .map(el => ({ el, seen: 0, active: false }))
-    const io = new IntersectionObserver(entries => {
-      for (const e of entries) {
-        const g = guarded.find(x => x.el === e.target); if (!g) continue
-        if (e.isIntersecting && e.intersectionRatio >= 0.2) { if (!g.seen) g.seen = performance.now() }
-        else { g.seen = 0; g.active = false }
-      }
-    }, { threshold: [0, 0.2, 0.5] })
-    guarded.forEach(g => io.observe(g.el))
+    const sections = [...document.querySelectorAll('#hero .hero-content, #skills .container, #projects .container, #education .container, #contact .container')]
+    const always = [...document.querySelectorAll('nav, #chat-panel, #chat-toggle')]
+    let zones = [], focus = null, focusSince = 0
 
-    let zones = []   // cell-space rects {x0,y0,x1,y1}
     function refreshZones(now) {
-      zones = []
-      for (const g of guarded) {
-        if (!g.seen) continue
-        if (!g.active && now - g.seen > 450) g.active = true   // short delay = the "reveal" moment
-        if (!g.active) continue
-        const r = g.el.getBoundingClientRect()
-        if (r.width === 0 || r.height === 0) continue
-        const pad = 14
-        zones.push({ x0: Math.floor((r.left - pad) / CELL), y0: Math.floor((r.top - pad) / CELL),
-                     x1: Math.ceil((r.right + pad) / CELL), y1: Math.ceil((r.bottom + pad) / CELL) })
+      // the section whose middle is closest to the viewport middle is the one being read
+      let best = null, bestD = Infinity
+      for (const el of sections) {
+        const r = el.getBoundingClientRect()
+        if (r.bottom < 0 || r.top > H) continue
+        const d = Math.abs((r.top + r.bottom) / 2 - H / 2)
+        if (d < bestD) { bestD = d; best = el }
       }
+      if (best !== focus) { focus = best; focusSince = now }
+      zones = []
+      const push = (r, pad) => { if (r.width && r.height) zones.push({ x0: r.left - pad, y0: r.top - pad, x1: r.right + pad, y1: r.bottom + pad }) }
+      for (const el of always) { const r = el.getBoundingClientRect(); if (getComputedStyle(el).display !== 'none') push(r, 6) }
+      if (focus && now - focusSince > 350) push(focus.getBoundingClientRect(), 16)   // brief delay = you see it clear
     }
-    const inZone = (x, y) => { for (const z of zones) if (x >= z.x0 && x < z.x1 && y >= z.y0 && y < z.y1) return true; return false }
+    const hitsZone = (x, y, s) => { for (const z of zones) if (x < z.x1 && x + s > z.x0 && y < z.y1 && y + s > z.y0) return true; return false }
+    const randSize = () => { const t = Math.random(); const v = MIN_S * Math.pow(MAX_S / MIN_S, Math.pow(t, 1.4)); return Math.max(GRID, Math.round(v / GRID) * GRID) }
+    const snap = v => Math.round(v / GRID) * GRID
 
     function resize() {
       dpr = Math.min(window.devicePixelRatio || 1, 2)
-      canvas.width = Math.floor(innerWidth * dpr); canvas.height = Math.floor(innerHeight * dpr)
+      W = innerWidth; H = innerHeight
+      canvas.width = Math.floor(W * dpr); canvas.height = Math.floor(H * dpr)
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-      cols = Math.ceil(innerWidth / CELL); rows = Math.ceil(innerHeight / CELL)
-      owner = new Int16Array(cols * rows).fill(-1)
-      colonies.length = 0; totalCells = 0
+      colonies.length = 0; total = 0
     }
 
     function spawn() {
-      // start on an edge so it looks like it creeps in from outside the page
-      const side = Math.floor(Math.random() * 4)
       let x, y
-      if (side === 0) { x = 0; y = Math.floor(Math.random() * rows) }
-      else if (side === 1) { x = cols - 1; y = Math.floor(Math.random() * rows) }
-      else if (side === 2) { x = Math.floor(Math.random() * cols); y = 0 }
-      else { x = Math.floor(Math.random() * cols); y = rows - 1 }
-      const idx = y * cols + x
-      if (owner[idx] !== -1 || inZone(x, y)) return
-      const toward = Math.atan2(rows / 2 - y, cols / 2 - x)
-      const c = { id: colonies.length, cells: [], phase: 'grow', color: PALETTE[Math.floor(Math.random() * PALETTE.length)],
-                  limit: 250 + Math.floor(Math.random() * 700), speed: 10 + Math.random() * 18,
-                  hold: 0, dirBias: toward + (Math.random() - 0.5) * 1.5, alpha: 0 }
-      owner[idx] = c.id; c.cells.push(idx); totalCells++
-      colonies.push(c)
+      if (Math.random() < 0.7) {   // from an edge
+        const side = Math.floor(Math.random() * 4)
+        x = side === 0 ? -20 : side === 1 ? W + 20 : Math.random() * W
+        y = side === 2 ? -20 : side === 3 ? H + 20 : Math.random() * H
+      } else { x = Math.random() * W; y = Math.random() * H }
+      const s = randSize()
+      if (hitsZone(x, y, s)) return
+      const toward = Math.atan2(H / 2 - y, W / 2 - x)
+      const c = { id: colonies.length, chunks: [{ x: snap(x), y: snap(y), s }], phase: 'grow', alpha: 0,
+                  color: PALETTE[Math.floor(Math.random() * PALETTE.length)],
+                  limit: 60 + Math.floor(Math.random() * 200), speed: 4 + Math.random() * 8,
+                  hold: 0, dir: toward + (Math.random() - 0.5) * 1.2 }
+      total++; colonies.push(c)
     }
 
     function step(now) {
       refreshZones(now)
       const alive = colonies.filter(c => c.phase !== 'dead').length
-      if (alive < 5 && totalCells < MAX_CELLS && Math.random() < 0.35) spawn()
+      if (alive < 14 && total < MAX_CHUNKS && Math.random() < 0.6) spawn()
       for (const c of colonies) {
         if (c.phase === 'dead') continue
-        c.alpha = Math.min(0.85, c.alpha + 0.08)
-        // 1) anything sitting on a guarded zone gets flushed out, fast
-        if (zones.length && c.cells.length) {
-          let budget = 60
-          for (let i = c.cells.length - 1; i >= 0 && budget > 0; i--) {
-            const idx = c.cells[i], x = idx % cols, y = (idx - x) / cols
-            if (inZone(x, y)) { owner[idx] = -1; c.cells.splice(i, 1); totalCells--; budget-- }
+        c.alpha = Math.min(0.8, c.alpha + 0.07)
+        // flush anything sitting on the focused section / nav / chat
+        if (zones.length) {
+          let budget = 14
+          for (let i = c.chunks.length - 1; i >= 0 && budget > 0; i--) {
+            const k = c.chunks[i]
+            if (hitsZone(k.x, k.y, k.s)) { c.chunks.splice(i, 1); total--; budget-- }
           }
         }
         if (c.phase === 'grow') {
           let tries = Math.ceil(c.speed)
-          while (tries-- > 0 && c.cells.length < c.limit && totalCells < MAX_CELLS) {
-            const n = c.cells.length; if (!n) break
-            const src = c.cells[Math.random() < 0.75 ? n - 1 - Math.floor(Math.random() * Math.min(12, n)) : Math.floor(Math.random() * n)]
-            const sx = src % cols, sy = (src - sx) / cols
-            const ang = Math.random() < 0.55 ? c.dirBias + (Math.random() - 0.5) * 1.6 : Math.random() * Math.PI * 2
-            const nx = sx + Math.round(Math.cos(ang)), ny = sy + Math.round(Math.sin(ang))
-            if (nx < 0 || ny < 0 || nx >= cols || ny >= rows) continue
-            const ni = ny * cols + nx
-            if (owner[ni] !== -1 || inZone(nx, ny)) continue
-            owner[ni] = c.id; c.cells.push(ni); totalCells++
+          while (tries-- > 0 && c.chunks.length < c.limit && total < MAX_CHUNKS) {
+            const n = c.chunks.length; if (!n) break
+            const src = c.chunks[Math.random() < 0.7 ? n - 1 - Math.floor(Math.random() * Math.min(6, n)) : Math.floor(Math.random() * n)]
+            const s = randSize()
+            const ang = Math.random() < 0.6 ? c.dir + (Math.random() - 0.5) * 1.8 : Math.random() * Math.PI * 2
+            // place the new chunk touching the source chunk's edge in that direction
+            const cx = src.x + src.s / 2 + Math.cos(ang) * (src.s / 2 + s / 2)
+            const cy = src.y + src.s / 2 + Math.sin(ang) * (src.s / 2 + s / 2)
+            const x = snap(cx - s / 2), y = snap(cy - s / 2)
+            if (x + s < -40 || y + s < -40 || x > W + 40 || y > H + 40) continue
+            if (hitsZone(x, y, s)) continue
+            c.chunks.push({ x, y, s }); total++
           }
-          if (c.cells.length >= c.limit || c.cells.length === 0) { c.phase = 'hold'; c.hold = 8 + Math.floor(Math.random() * 25) }
-          if (Math.random() < 0.15) c.dirBias += (Math.random() - 0.5) * 0.8
+          if (c.chunks.length >= c.limit || c.chunks.length === 0) { c.phase = 'hold'; c.hold = 6 + Math.floor(Math.random() * 24) }
+          if (Math.random() < 0.2) c.dir += (Math.random() - 0.5) * 0.9
         } else if (c.phase === 'hold') {
           if (--c.hold <= 0) c.phase = 'retract'
         } else if (c.phase === 'retract') {
-          let n = Math.ceil(c.speed * 1.4)
-          while (n-- > 0 && c.cells.length) { owner[c.cells.pop()] = -1; totalCells-- }
-          if (!c.cells.length) c.phase = 'dead'
+          let n = Math.ceil(c.speed * 1.3)
+          while (n-- > 0 && c.chunks.length) { c.chunks.pop(); total-- }
+          if (!c.chunks.length) c.phase = 'dead'
         }
       }
-      if (colonies.length > 30 && colonies.filter(c => c.phase !== 'dead').length < 8) {
-        const live = colonies.filter(c => c.phase !== 'dead')
-        owner.fill(-1); colonies.length = 0
-        live.forEach((c, i) => { c.id = i; colonies.push(c); for (const ci of c.cells) owner[ci] = i })
-      }
+      if (colonies.length > 40) { const live = colonies.filter(c => c.phase !== 'dead'); colonies.length = 0; colonies.push(...live) }
     }
 
     function draw() {
-      ctx.clearRect(0, 0, innerWidth, innerHeight)
+      ctx.clearRect(0, 0, W, H)
       for (const c of colonies) {
         if (c.phase === 'dead') continue
-        const [r, g, b] = c.color, n = c.cells.length
+        const [r, g, b] = c.color, n = c.chunks.length
         for (let i = 0; i < n; i++) {
-          const idx = c.cells[i], x = idx % cols, y = (idx - x) / cols
-          const a = c.alpha * (0.5 + 0.5 * (i / n))
+          const k = c.chunks[i]
+          // bigger chunks are a little more transparent so text underneath stays legible
+          const sizeFade = 1 - 0.45 * Math.min(1, k.s / MAX_S)
+          const a = c.alpha * sizeFade * (0.55 + 0.45 * (i / n))
           ctx.fillStyle = `rgba(${r},${g},${b},${a})`
-          ctx.fillRect(x * CELL + 1, y * CELL + 1, CELL - 2, CELL - 2)
+          ctx.fillRect(k.x + 1, k.y + 1, k.s - 2, k.s - 2)
         }
       }
     }
@@ -1262,12 +1256,13 @@
     let last = 0
     function loop(t) {
       if (!last) last = t
-      if ((cols === 0 || canvas.width === 0) && innerWidth > 0) resize()
+      if ((W === 0 || canvas.width === 0) && innerWidth > 0) resize()
       let n = Math.min(4, Math.floor((t - last) / STEP_MS))
       if (n > 0) { while (n-- > 0) step(t); draw(); last = t }
       requestAnimationFrame(loop)
     }
     resize()
+    for (let i = 0; i < 45; i++) step(performance.now() - 2000)
     let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(resize, 150) })
     requestAnimationFrame(loop)
   })();
