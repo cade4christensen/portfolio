@@ -1019,7 +1019,7 @@
 </div>
 
 <script>
-  // ── Pixelated world map background: land as dots, with an infection creeping across the continents ──
+  // ── Pixelated world map background: land as dots, visited places, and a traveling pixel ──
   (() => {
     const canvas = document.getElementById('pixels')
     if (!canvas) return
@@ -1138,53 +1138,6 @@
       // cover the viewport: map spans the full width, or the full height on tall screens
       cell = Math.max(W / COLS, (H * 0.9) / ROWS)
       ox = (W - cell * COLS) / 2; oy = (H - cell * ROWS) / 2
-      owner.fill(-1); colonies.length = 0
-    }
-
-    // infection that only travels over land
-    const owner = new Int16Array(COLS * ROWS).fill(-1)
-    const colonies = []
-    const PALETTE = [[147,51,234],[232,121,249],[192,132,252],[168,85,247]]
-    function spawn() {
-      const idx = landIdx[Math.floor(Math.random() * landIdx.length)]
-      if (owner[idx] !== -1) return
-      const c = { id: colonies.length, cells: [idx], phase: 'grow', limit: 30 + Math.floor(Math.random() * 120),
-                  speed: 1 + Math.random() * 2, color: PALETTE[Math.floor(Math.random() * PALETTE.length)], alpha: 0, hold: 0 }
-      owner[idx] = c.id; colonies.push(c)
-    }
-    function step() {
-      const alive = colonies.filter(c => c.phase !== 'dead').length
-      if (alive < 5 && Math.random() < 0.4) spawn()
-      for (const c of colonies) {
-        if (c.phase === 'dead') continue
-        c.alpha = Math.max(0, Math.min(0.85, c.alpha + (c.phase === 'retract' ? -0.02 : 0.04)))
-        if (c.phase === 'grow') {
-          let tries = Math.ceil(c.speed)
-          while (tries-- > 0 && c.cells.length < c.limit) {
-            const n = c.cells.length
-            const src = c.cells[Math.random() < 0.6 ? n - 1 - Math.floor(Math.random() * Math.min(6, n)) : Math.floor(Math.random() * n)]
-            const sx = src % COLS, sy = (src - sx) / COLS
-            const d = Math.floor(Math.random() * 4)
-            const nx = sx + (d === 0 ? 1 : d === 1 ? -1 : 0), ny = sy + (d === 2 ? 1 : d === 3 ? -1 : 0)
-            if (nx < 0 || ny < 0 || nx >= COLS || ny >= ROWS) continue
-            const ni = ny * COLS + nx
-            if (!land[ni] || owner[ni] !== -1) continue
-            owner[ni] = c.id; c.cells.push(ni)
-          }
-          c.stall = c.cells.length === c.last ? (c.stall || 0) + 1 : 0; c.last = c.cells.length
-          if (c.cells.length >= c.limit || c.stall > 8) { c.phase = 'hold'; c.hold = 20 + Math.floor(Math.random() * 60) }
-        } else if (c.phase === 'hold') {
-          if (--c.hold <= 0) c.phase = 'retract'
-        } else if (c.phase === 'retract') {
-          let n = Math.ceil(c.speed * 1.5)
-          while (n-- > 0 && c.cells.length) owner[c.cells.pop()] = -1
-          if (!c.cells.length) c.phase = 'dead'
-        }
-      }
-      if (colonies.length > 40) {
-        const live = colonies.filter(c => c.phase !== 'dead'); owner.fill(-1); colonies.length = 0
-        live.forEach((c, i) => { c.id = i; colonies.push(c); for (const ci of c.cells) owner[ci] = i })
-      }
     }
 
     function draw(t) {
@@ -1195,16 +1148,6 @@
       for (let i = 0; i < landIdx.length; i++) {
         const idx = landIdx[i], x = idx % COLS, y = (idx - x) / COLS
         ctx.fillRect(ox + x * cell + 1, oy + y * cell + 1, g, g)
-      }
-      // infection
-      for (const c of colonies) {
-        if (c.phase === 'dead' || c.alpha <= 0) continue
-        const [r, gg, b] = c.color, n = c.cells.length
-        for (let i = 0; i < n; i++) {
-          const idx = c.cells[i], x = idx % COLS, y = (idx - x) / COLS
-          ctx.fillStyle = `rgba(${r},${gg},${b},${c.alpha * (0.5 + 0.5 * (i / n))})`
-          ctx.fillRect(ox + x * cell + 1, oy + y * cell + 1, g, g)
-        }
       }
       drawTraveler(t)
       // Salt Lake City: pulsing marker
@@ -1217,20 +1160,14 @@
       ctx.beginPath(); ctx.arc(px, py, cell * (1.2 + 2.2 * pulse), 0, Math.PI * 2); ctx.stroke()
     }
 
-    const STEP_MS = 70
-    let last = 0
     function loop(t) {
-      if (!last) last = t
-      if ((W === 0 || canvas.width === 0) && innerWidth > 0) { resize(); prerun() }
-      let n = reduce ? 0 : Math.min(6, Math.floor((t - last) / STEP_MS))
-      if (n > 0) { while (n-- > 0) step(); last = t }
+      if ((W === 0 || canvas.width === 0) && innerWidth > 0) resize()
       stepTraveler(t)
       draw(t)
       requestAnimationFrame(loop)
     }
-    function prerun() { if (!reduce) for (let i = 0; i < 120; i++) step() }
-    resize(); prerun()
-    let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { resize(); prerun() }, 150) })
+    resize()
+    let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(resize, 150) })
     requestAnimationFrame(loop)
   })();
 
