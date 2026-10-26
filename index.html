@@ -1193,21 +1193,19 @@
     }
 
     function spawn() {
-      let x, y
-      if (Math.random() < 0.7) {   // from an edge
-        const side = Math.floor(Math.random() * 4)
-        x = side === 0 ? -20 : side === 1 ? W + 20 : Math.random() * W
-        y = side === 2 ? -20 : side === 3 ? H + 20 : Math.random() * H
-      } else { x = Math.random() * W; y = Math.random() * H }
+      // a contained body: a center somewhere on screen and a hard radius it never grows past
+      const radius = 90 + Math.random() * 150
+      const cx = radius + Math.random() * Math.max(1, W - 2 * radius)
+      const cy = radius + Math.random() * Math.max(1, H - 2 * radius)
       const s = randSize()
-      x = snap(x); y = snap(y)
+      const x = snap(cx - s / 2), y = snap(cy - s / 2)
       if (hitsZone(x, y, s) || !fits(x, y, s)) return
       mark(x, y, s, 1)
-      const toward = Math.atan2(H / 2 - y, W / 2 - x)
       const c = { id: colonies.length, chunks: [{ x, y, s }], phase: 'grow', alpha: 0,
                   color: PALETTE[Math.floor(Math.random() * PALETTE.length)],
-                  limit: 500 + Math.floor(Math.random() * 700), speed: 10 + Math.random() * 14,
-                  hold: 0, dir: toward + (Math.random() - 0.5) * 1.2 }
+                  cx, cy, radius,
+                  limit: 400 + Math.floor(Math.random() * 500), speed: 10 + Math.random() * 14,
+                  hold: 0, dir: 0 }
       total++; colonies.push(c)
     }
 
@@ -1230,8 +1228,8 @@
           let tries = Math.ceil(c.speed)
           while (tries-- > 0 && c.chunks.length < c.limit && total < MAX_CHUNKS) {
             const n = c.chunks.length; if (!n) break
-            const src = c.chunks[Math.random() < 0.7 ? n - 1 - Math.floor(Math.random() * Math.min(6, n)) : Math.floor(Math.random() * n)]
-            const ang = Math.random() < 0.6 ? c.dir + (Math.random() - 0.5) * 1.8 : Math.random() * Math.PI * 2
+            const src = c.chunks[Math.floor(Math.random() * n)]
+            const ang = Math.random() * Math.PI * 2
             const dx = Math.cos(ang), dy = Math.sin(ang)
             // snap the direction to one of the 4 sides of the source so the new chunk sits flush against it
             const side = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 0 : 1) : (dy > 0 ? 2 : 3)
@@ -1245,6 +1243,7 @@
               else if (side === 2) { x = src.x + off; y = src.y + src.s }
               else { x = src.x + off; y = src.y - s }
               if (x + s < 0 || y + s < 0 || x > W || y > H) break
+              if (Math.hypot(x + s / 2 - c.cx, y + s / 2 - c.cy) > c.radius) { s = Math.max(MIN_S, snap(s / 2)); if (s <= MIN_S) break; continue }
               if (!hitsZone(x, y, s) && fits(x, y, s)) { mark(x, y, s, 1); c.chunks.push({ x, y, s }); total++; placed = true }
               else if (s <= MIN_S) break
               else s = Math.max(MIN_S, snap(s / 2))
@@ -1263,10 +1262,12 @@
             else if (side === 2) { x = src.x + off; y = src.y + src.s }
             else { x = src.x + off; y = src.y - s }
             if (x < 0 || y < 0 || x + s > W || y + s > H) continue
+            if (Math.hypot(x + s / 2 - c.cx, y + s / 2 - c.cy) > c.radius) continue
             if (!hitsZone(x, y, s) && fits(x, y, s)) { mark(x, y, s, 1); c.chunks.push({ x, y, s }); total++ }
           }
-          if (c.chunks.length >= c.limit || c.chunks.length === 0) { c.phase = 'hold'; c.hold = 15 + Math.floor(Math.random() * 40) }
-          if (Math.random() < 0.2) c.dir += (Math.random() - 0.5) * 0.9
+          c.stall = (c.chunks.length === c.lastCount) ? (c.stall || 0) + 1 : 0
+          c.lastCount = c.chunks.length
+          if (c.chunks.length >= c.limit || c.chunks.length === 0 || c.stall > 6) { c.phase = 'hold'; c.hold = 15 + Math.floor(Math.random() * 40) }
         } else if (c.phase === 'hold') {
           if (--c.hold <= 0) c.phase = 'retract'
         } else if (c.phase === 'retract') {
