@@ -1039,6 +1039,42 @@
     // Places I've traveled. A faint pixel flies there from Salt Lake City and back, one trip at a time.
     // Add entries as { name, lat, lon }.
     const TRIPS = [
+      { name: 'Mexico City, Mexico', lat: 19.43, lon: -99.13 },
+      { name: 'Vancouver, Canada', lat: 49.28, lon: -123.12 },
+      { name: 'Panama City, Panama', lat: 8.98, lon: -79.52 },
+      { name: 'San José, Costa Rica', lat: 9.93, lon: -84.08 },
+      { name: 'Punta Cana, Dominican Republic', lat: 18.58, lon: -68.37 },
+      { name: 'Paris, France', lat: 48.86, lon: 2.35 },
+      { name: 'Madrid, Spain', lat: 40.42, lon: -3.7 },
+      { name: 'London, Britain', lat: 51.51, lon: -0.13 },
+      { name: 'San Salvador, El Salvador', lat: 13.69, lon: -89.19 },
+      { name: 'Cusco, Peru', lat: -13.53, lon: -71.97 },
+      { name: 'Siem Reap, Cambodia', lat: 13.36, lon: 103.86 },
+      { name: 'Hanoi, Vietnam', lat: 21.03, lon: 105.85 },
+      { name: 'Taipei, Taiwan', lat: 25.03, lon: 121.57 },
+      { name: 'Zurich, Switzerland', lat: 47.38, lon: 8.54 },
+      { name: 'Munich, Germany', lat: 48.14, lon: 11.58 },
+      { name: 'Budapest, Hungary', lat: 47.5, lon: 19.04 },
+      { name: 'Prague, Czechia', lat: 50.08, lon: 14.44 },
+      { name: 'Vienna, Austria', lat: 48.21, lon: 16.37 },
+      { name: 'Cairo, Egypt', lat: 30.04, lon: 31.24 },
+      { name: 'Livingstone, Zambia', lat: -17.85, lon: 25.85 },
+      { name: 'Bogotá, Colombia', lat: 4.71, lon: -74.07 },
+      { name: 'Sydney, Australia', lat: -33.87, lon: 151.21 },
+      { name: 'Rome, Italy', lat: 41.9, lon: 12.5 },
+      { name: 'Vatican City', lat: 41.9, lon: 12.45 },
+      { name: 'Amsterdam, Netherlands', lat: 52.37, lon: 4.9 },
+      { name: 'Rio de Janeiro, Brazil', lat: -22.91, lon: -43.17 },
+      { name: 'Buenos Aires, Argentina', lat: -34.6, lon: -58.38 },
+      { name: 'Asunción, Paraguay', lat: -25.26, lon: -57.58 },
+      { name: 'Ljubljana, Slovenia', lat: 46.05, lon: 14.51 },
+      { name: 'Dubrovnik, Croatia', lat: 42.65, lon: 18.09 },
+      { name: 'Kotor, Montenegro', lat: 42.42, lon: 18.77 },
+      { name: 'Mostar, Bosnia & Herzegovina', lat: 43.34, lon: 17.81 },
+      { name: 'Bratislava, Slovakia', lat: 48.15, lon: 17.11 },
+      { name: 'Kraków, Poland', lat: 50.06, lon: 19.94 },
+      { name: 'Belize City, Belize', lat: 17.5, lon: -88.19 },
+      { name: 'Antigua, Guatemala', lat: 14.56, lon: -90.73 },
     ]
     const toCell = (lat, lon) => [ (lon + 180) / 360 * COLS, (MAP.latMax - lat) / (MAP.latMax - MAP.latMin) * ROWS ]
     const home = toCell(SLC.lat, SLC.lon)
@@ -1072,13 +1108,15 @@
       if (trip.phase === 'stay' && now - trip.t0 > 1800) { const f = trip.from; trip.from = trip.to; trip.to = f; trip.phase = 'back'; trip.t0 = now }
     }
     function drawTraveler(now) {
-      if (!TRIPS.length || trip.phase === 'idle') return
+      if (!TRIPS.length) return
       const g = Math.max(1, cell - 2)
-      const dest = toCell(TRIPS[trip.i].lat, TRIPS[trip.i].lon)
-      // destination pixel, faint
-      ctx.fillStyle = 'rgba(232,121,249,0.55)'
-      ctx.fillRect(ox + Math.floor(dest[0]) * cell + 1, oy + Math.floor(dest[1]) * cell + 1, g, g)
-      if (trip.phase === 'stay') return
+      // every place, very faint; the current one brighter
+      for (let i = 0; i < TRIPS.length; i++) {
+        const d = toCell(TRIPS[i].lat, TRIPS[i].lon)
+        ctx.fillStyle = i === trip.i && trip.phase !== 'idle' ? 'rgba(232,121,249,0.7)' : 'rgba(232,121,249,0.28)'
+        ctx.fillRect(ox + Math.floor(d[0]) * cell + 1, oy + Math.floor(d[1]) * cell + 1, g, g)
+      }
+      if (trip.phase === 'idle' || trip.phase === 'stay') return
       const [x, y] = travelerPos(now)
       const cx = Math.floor(x), cy = Math.floor(y)
       const last = trip.trail[trip.trail.length - 1]
