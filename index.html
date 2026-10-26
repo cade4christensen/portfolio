@@ -1194,8 +1194,11 @@
 
     function spawn() {
       // a contained body: a center somewhere on screen and a hard radius it never grows past
+      // only in the side margins: center sits in the outer ~18% of the width, or just off-screen
       const radius = 90 + Math.random() * 150
-      const cx = radius + Math.random() * Math.max(1, W - 2 * radius)
+      const band = Math.max(80, W * 0.18)
+      const left = Math.random() < 0.5
+      const cx = left ? Math.random() * band - radius * 0.3 : W - Math.random() * band + radius * 0.3
       const cy = radius + Math.random() * Math.max(1, H - 2 * radius)
       const s = randSize()
       const x = snap(cx - s / 2), y = snap(cy - s / 2)
@@ -1203,7 +1206,7 @@
       mark(x, y, s, 1)
       const c = { id: colonies.length, chunks: [{ x, y, s }], phase: 'grow', alpha: 0,
                   color: PALETTE[Math.floor(Math.random() * PALETTE.length)],
-                  cx, cy, radius,
+                  cx, cy, radius: Math.min(radius, band + 40),
                   limit: 400 + Math.floor(Math.random() * 500), speed: 10 + Math.random() * 14,
                   hold: 0, dir: 0 }
       total++; colonies.push(c)
