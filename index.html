@@ -1139,8 +1139,8 @@
     const ctx = canvas.getContext('2d')
     const STEP_MS = 30
     const GRID = 4                    // everything snaps to this
-    const MIN_S = 4, MAX_S = 128       // chunk sizes (px); log-uniform so most are small, some are huge
-    const MAX_CHUNKS = 2600
+    const MIN_S = 4, MAX_S = 72       // chunk sizes (px); log-uniform so most are small, some are huge
+    const MAX_CHUNKS = 4200
     const PALETTE = [[232,121,249],[192,132,252],[147,51,234],[129,140,248],[244,114,182]]
     let W = 0, H = 0, dpr = 1
     const colonies = []
@@ -1179,7 +1179,7 @@
       if (focus && now - focusSince > 350) push(focus.getBoundingClientRect(), 16)   // brief delay = you see it clear
     }
     const hitsZone = (x, y, s) => { for (const z of zones) if (x < z.x1 && x + s > z.x0 && y < z.y1 && y + s > z.y0) return true; return false }
-    const randSize = () => { const t = Math.random(); const v = MIN_S * Math.pow(MAX_S / MIN_S, Math.pow(t, 1.4)); return Math.max(GRID, Math.round(v / GRID) * GRID) }
+    const randSize = () => { const t = Math.random(); const v = MIN_S * Math.pow(MAX_S / MIN_S, Math.pow(t, 2.2)); return Math.max(GRID, Math.round(v / GRID) * GRID) }
     const snap = v => Math.round(v / GRID) * GRID
 
     function resize() {
@@ -1206,7 +1206,7 @@
       const toward = Math.atan2(H / 2 - y, W / 2 - x)
       const c = { id: colonies.length, chunks: [{ x, y, s }], phase: 'grow', alpha: 0,
                   color: PALETTE[Math.floor(Math.random() * PALETTE.length)],
-                  limit: 60 + Math.floor(Math.random() * 200), speed: 4 + Math.random() * 8,
+                  limit: 120 + Math.floor(Math.random() * 300), speed: 6 + Math.random() * 10,
                   hold: 0, dir: toward + (Math.random() - 0.5) * 1.2 }
       total++; colonies.push(c)
     }
@@ -1249,6 +1249,21 @@
               else if (s <= MIN_S) break
               else s = Math.max(MIN_S, snap(s / 2))
             }
+          }
+          // fill gaps: small chunks tucked against random existing ones
+          let fill = 4
+          while (fill-- > 0 && c.chunks.length && c.chunks.length < c.limit && total < MAX_CHUNKS) {
+            const src = c.chunks[Math.floor(Math.random() * c.chunks.length)]
+            const s = Math.random() < 0.6 ? MIN_S : MIN_S * 2
+            const side = Math.floor(Math.random() * 4)
+            const off = snap(Math.random() * (src.s - s + GRID))
+            let x, y
+            if (side === 0) { x = src.x + src.s; y = src.y + off }
+            else if (side === 1) { x = src.x - s; y = src.y + off }
+            else if (side === 2) { x = src.x + off; y = src.y + src.s }
+            else { x = src.x + off; y = src.y - s }
+            if (x < 0 || y < 0 || x + s > W || y + s > H) continue
+            if (!hitsZone(x, y, s) && fits(x, y, s)) { mark(x, y, s, 1); c.chunks.push({ x, y, s }); total++ }
           }
           if (c.chunks.length >= c.limit || c.chunks.length === 0) { c.phase = 'hold'; c.hold = 6 + Math.floor(Math.random() * 24) }
           if (Math.random() < 0.2) c.dir += (Math.random() - 0.5) * 0.9
