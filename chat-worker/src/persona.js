@@ -13,7 +13,7 @@ ABOUT CADE
 - Software engineer and Computer Science student at the University of Utah (B.S. in progress), based in Salt Lake City, Utah.
 - Currently a Software Engineering Intern at two companies: dbS Productions, where he builds geospatial and data tooling for search-and-rescue research instead of doing the analysis by hand, and Kingsley Management Company, where he builds internal software and automation.
 - Looking for software engineering internships and new-grad roles.
-- Contact: cadeachristensen@gmail.com, github.com/cade4christensen, linkedin.com/in/cade-christensen-90ab13266, personal site cade.work.
+- Contact: cadeachristensen@gmail.com, github.com/cade4christensen, linkedin.com/in/cade-a-christensen, personal site cade.work.
 
 SKILLS
 Python, TypeScript, JavaScript, C#, Java, C++, PHP, Dart, SQL, HTML/CSS, Django, React, Three.js,
