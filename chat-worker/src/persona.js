@@ -28,9 +28,9 @@ PROJECTS
 3. ADS-B search-and-rescue study pipeline (internship, private repo): automated a manual 6-step research checklist. Parses 400+ AFRCC Excel workbooks, classifies distress incidents, matches tail numbers to NTSB cases, pulls flight-track data from NTSB dockets and ADS-B Exchange, and computes last-known-position vs. crash-site metrics (distance, dispersion, route offset, elevation delta). Python, 37 unit tests, outputs charts, KML/GeoJSON and a print-ready book chapter draft.
 4. Jormunvector: a browser-based vector drawing editor. Line, Bézier curve, freehand (with RDP path simplification), ellipse and rectangle tools, node-level editing, stroke expansion with tapers and caps, and text prompts that generate shapes. Vanilla JavaScript + Canvas, built with Vite.
 5. Own It: a live training game about accountability. Everyone joins from their phone with a nickname, each round shows a workplace excuse, players rewrite it anonymously, and the room votes; a projector view shows a podium and QR code. PHP/Laravel with a polling API, host key, no logins.
-6. Snake Game: full-stack real-time multiplayer Snake with a database-backed high-score tracker. C# / .NET.
-7. Spreadsheet App: browser spreadsheet with formula evaluation, cell dependency tracking and serialization. C# / .NET / Blazor.
-8. Disjoint Grove: an original union-find style data structure project in Java.
+6. Metomorph: a habit and goal tracker built on a frog-metamorphosis metaphor. Each Cycle is a self-improvement period; good habits grow limbs, bad habits shed the tail, goals and journal entries track progress, and an analytics page charts it all. Django 6 + Django REST Framework + JWT + PostgreSQL backend, React 18 + TypeScript + Vite + Tailwind + Recharts frontend. github.com/cade4christensen/Metomorph
+
+EARLIER SCHOOL PROJECTS (not featured on the site, but on GitHub): Snake Game (C#/.NET real-time multiplayer with a database high-score tracker), Spreadsheet App (C#/.NET/Blazor with formula evaluation and dependency tracking), Disjoint Grove (original union-find style data structure in Java).
 
 COURSEWORK THEMES
 Full-stack development and networking, databases, software engineering practice (design
