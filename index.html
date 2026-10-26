@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cade Christensen — Software Engineer</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -99,56 +99,57 @@
     align-items: center;
     padding-top: 80px;
   }
+  #hero .container { width: 100%; }
   .hero-inner {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 60px;
-    align-items: center;
     width: 100%;
     padding: 80px 0;
+    max-width: 900px;
   }
   .hero-eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 13px;
-    font-weight: 500;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--purple);
-    margin-bottom: 20px;
+    letter-spacing: 0.08em;
+    color: var(--pink);
+    margin-bottom: 28px;
     display: flex;
     align-items: center;
     gap: 10px;
   }
   .hero-eyebrow::before {
     content: '';
-    display: block;
-    width: 24px;
-    height: 2px;
-    background: var(--grad);
-    border-radius: 1px;
+    width: 8px; height: 8px;
+    background: var(--pink);
+    box-shadow: 0 0 10px var(--pink);
   }
+  .hero-eyebrow::after {
+    content: '';
+    width: 7px; height: 15px;
+    background: var(--pink);
+    margin-left: 2px;
+    animation: blink 1.1s steps(2, start) infinite;
+  }
+  @keyframes blink { to { visibility: hidden; } }
   .hero-name {
     font-family: 'Space Grotesk', sans-serif;
-    font-size: clamp(48px, 8vw, 96px);
-    font-weight: 800;
-    line-height: 1.0;
-    letter-spacing: -0.03em;
-    margin-bottom: 16px;
+    font-size: clamp(44px, 7.2vw, 104px);
+    font-weight: 700;
+    line-height: 0.95;
+    letter-spacing: -0.045em;
+    color: var(--text);
+    margin-bottom: 28px;
+    white-space: nowrap;
   }
-  .hero-name .line1 { display: block; color: var(--text); }
-  .hero-name .line2 {
-    display: block;
-    background: var(--grad);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
+  .hero-name .line1, .hero-name .line2 { display: inline; color: inherit; }
+  .hero-name .line2 { margin-left: 0.22em; }
   .hero-subtitle {
-    font-size: 20px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 16px;
+    line-height: 1.75;
     color: var(--muted);
     margin-bottom: 40px;
-    font-weight: 400;
-    max-width: 480px;
+    max-width: 560px;
   }
+  .hero-subtitle b { color: var(--text); font-weight: 500; }
   .hero-btns {
     display: flex;
     gap: 14px;
@@ -183,66 +184,6 @@
     transition: border-color 0.2s, transform 0.2s;
   }
   .btn-outline:hover { border-color: var(--purple); transform: translateY(-1px); }
-
-  /* Creative avatar / monogram */
-  .hero-visual {
-    position: relative;
-    width: 260px;
-    height: 260px;
-    flex-shrink: 0;
-  }
-  .hero-visual-ring {
-    position: absolute;
-    inset: 0;
-    border-radius: 50%;
-    border: 2px solid transparent;
-    background: var(--grad) border-box;
-    -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: destination-out;
-    mask-composite: exclude;
-    animation: spin 12s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .hero-visual-inner {
-    position: absolute;
-    inset: 12px;
-    border-radius: 50%;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-  }
-  .hero-monogram {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 96px;
-    font-weight: 800;
-    letter-spacing: -0.06em;
-    background: var(--grad);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    line-height: 1;
-    user-select: none;
-  }
-  /* Orbiting dot */
-  .hero-visual-orbit {
-    position: absolute;
-    inset: -6px;
-    animation: spin 6s linear infinite reverse;
-  }
-  .orbit-dot {
-    position: absolute;
-    top: 50%;
-    left: -4px;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: var(--pink);
-    box-shadow: 0 0 16px var(--pink);
-    transform: translateY(-50%);
-  }
 
   /* ── Section headers ── */
   .section-label {
@@ -671,12 +612,9 @@
     nav { padding: 16px 20px; }
     .nav-links { gap: 20px; }
     .container { padding: 0 20px; }
-    .hero-inner { grid-template-columns: 1fr; text-align: center; gap: 40px; padding: 60px 0; }
-    .hero-eyebrow { justify-content: center; }
-    .hero-subtitle { margin: 0 auto 40px; }
-    .hero-btns { justify-content: center; }
-    .hero-visual { margin: 0 auto; width: 180px; height: 180px; }
-    .hero-monogram { font-size: 48px; }
+    .hero-inner { padding: 40px 0; }
+    .hero-name { white-space: normal; font-size: clamp(44px, 13vw, 72px); }
+    .hero-name .line2 { margin-left: 0; display: block; }
     .edu-card { grid-template-columns: 1fr; }
     .skills-list { grid-template-columns: 1fr; }
     footer { flex-direction: column; gap: 8px; text-align: center; }
@@ -706,12 +644,12 @@
   <div class="container">
     <div class="hero-inner">
       <div class="hero-content">
-        <div class="hero-eyebrow">Based in Salt Lake City</div>
+        <div class="hero-eyebrow">salt lake city, utah</div>
         <h1 class="hero-name">
           <span class="line1">Cade</span>
           <span class="line2">Christensen</span>
         </h1>
-        <p class="hero-subtitle">Software Engineering Intern at dbS Productions and CS student at the University of Utah. I build geospatial tooling, web apps, and the occasional frog.</p>
+        <p class="hero-subtitle"><b>Software engineer</b> at dbS Productions, CS at the University of Utah. I build geospatial tooling, web apps, and the occasional frog.</p>
         <div class="hero-btns">
           <a class="btn-primary" href="mailto:cadeachristensen@gmail.com">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
@@ -729,15 +667,6 @@
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 18 15 15"/></svg>
             Resume
           </a>
-        </div>
-      </div>
-      <div class="hero-visual">
-        <div class="hero-visual-ring"></div>
-        <div class="hero-visual-inner">
-          <span class="hero-monogram">CC</span>
-        </div>
-        <div class="hero-visual-orbit">
-          <div class="orbit-dot"></div>
         </div>
       </div>
     </div>
