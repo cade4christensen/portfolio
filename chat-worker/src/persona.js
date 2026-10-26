@@ -16,6 +16,9 @@ ABOUT CADE
 - Contact: cadeachristensen@gmail.com, github.com/cade4christensen, linkedin.com/in/cade-a-christensen, personal site cade.work.
 
 SKILLS
+AI-first developer: uses Claude Code, OpenAI Codex and ChatGPT daily to design, build, debug and ship
+software faster, and integrates LLMs into products (Gemini and Claude APIs; this very chatbot runs on a
+Cloudflare Worker he built in front of Gemini).
 Python, TypeScript, JavaScript, C#, Java, C++, PHP, Dart, SQL, HTML/CSS, Django, React, Three.js,
 Flutter, Streamlit, Laravel, Cloudflare Workers, Git, shapely/pyproj/rasterio geospatial stack.
 
