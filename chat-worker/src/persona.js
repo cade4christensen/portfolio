@@ -16,8 +16,8 @@ ABOUT CADE
 - Contact: cadeachristensen@gmail.com, github.com/cade4christensen, linkedin.com/in/cade-christensen-90ab13266, personal site cade.work.
 
 SKILLS
-Python, TypeScript, JavaScript, C#, Java, C++, SQL, HTML/CSS, Django, React, Three.js,
-Streamlit, Laravel/PHP, Cloudflare Workers, Git, shapely/pyproj/rasterio geospatial stack.
+Python, TypeScript, JavaScript, C#, Java, C++, PHP, Dart, SQL, HTML/CSS, Django, React, Three.js,
+Flutter, Streamlit, Laravel, Cloudflare Workers, Git, shapely/pyproj/rasterio geospatial stack.
 
 PROJECTS
 1. cade.work (frog-site): one-page personal site with a 3D frog that lives on the page, climbing the text and walls, jumping, sleeping. Vite + TypeScript + Three.js, ortho "terrarium" camera, Bayer dot-grid look. Deployed as a Cloudflare Worker with static assets. The frog 3D model itself was made in Blender by a collaborator, not by Cade; Cade wrote the site and all the frog behavior, surface-walking, jumping, and animation-cleanup code.
