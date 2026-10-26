@@ -1036,59 +1036,45 @@
     const slcC = Math.floor((SLC.lon + 180) / 360 * COLS)
     const slcR = Math.floor((MAP.latMax - SLC.lat) / (MAP.latMax - MAP.latMin) * ROWS)
 
-    // Places I've traveled. A faint pixel flies there from Salt Lake City and back, one trip at a time.
-    // Add entries as { name, lat, lon }.
+    // Trips I've taken. Each trip is a list of stops; the pixel flies from Salt Lake City through
+    // every stop in order, then home. Add entries as { name, lat, lon }.
     const TRIPS = [
-      { name: 'Mexico City, Mexico', lat: 19.43, lon: -99.13 },
-      { name: 'Vancouver, Canada', lat: 49.28, lon: -123.12 },
-      { name: 'Panama City, Panama', lat: 8.98, lon: -79.52 },
-      { name: 'San José, Costa Rica', lat: 9.93, lon: -84.08 },
-      { name: 'Punta Cana, Dominican Republic', lat: 18.58, lon: -68.37 },
-      { name: 'Paris, France', lat: 48.86, lon: 2.35 },
-      { name: 'Madrid, Spain', lat: 40.42, lon: -3.7 },
-      { name: 'London, Britain', lat: 51.51, lon: -0.13 },
-      { name: 'San Salvador, El Salvador', lat: 13.69, lon: -89.19 },
-      { name: 'Cusco, Peru', lat: -13.53, lon: -71.97 },
-      { name: 'Siem Reap, Cambodia', lat: 13.36, lon: 103.86 },
-      { name: 'Hanoi, Vietnam', lat: 21.03, lon: 105.85 },
-      { name: 'Taipei, Taiwan', lat: 25.03, lon: 121.57 },
-      { name: 'Zurich, Switzerland', lat: 47.38, lon: 8.54 },
-      { name: 'Munich, Germany', lat: 48.14, lon: 11.58 },
-      { name: 'Budapest, Hungary', lat: 47.5, lon: 19.04 },
-      { name: 'Prague, Czechia', lat: 50.08, lon: 14.44 },
-      { name: 'Vienna, Austria', lat: 48.21, lon: 16.37 },
-      { name: 'Cairo, Egypt', lat: 30.04, lon: 31.24 },
-      { name: 'Livingstone, Zambia', lat: -17.85, lon: 25.85 },
-      { name: 'Bogotá, Colombia', lat: 4.71, lon: -74.07 },
-      { name: 'Sydney, Australia', lat: -33.87, lon: 151.21 },
-      { name: 'Rome, Italy', lat: 41.9, lon: 12.5 },
-      { name: 'Vatican City', lat: 41.9, lon: 12.45 },
-      { name: 'Amsterdam, Netherlands', lat: 52.37, lon: 4.9 },
-      { name: 'Rio de Janeiro, Brazil', lat: -22.91, lon: -43.17 },
-      { name: 'Buenos Aires, Argentina', lat: -34.6, lon: -58.38 },
-      { name: 'Asunción, Paraguay', lat: -25.26, lon: -57.58 },
-      { name: 'Ljubljana, Slovenia', lat: 46.05, lon: 14.51 },
-      { name: 'Dubrovnik, Croatia', lat: 42.65, lon: 18.09 },
-      { name: 'Kotor, Montenegro', lat: 42.42, lon: 18.77 },
-      { name: 'Mostar, Bosnia & Herzegovina', lat: 43.34, lon: 17.81 },
-      { name: 'Bratislava, Slovakia', lat: 48.15, lon: 17.11 },
-      { name: 'Kraków, Poland', lat: 50.06, lon: 19.94 },
-      { name: 'Belize City, Belize', lat: 17.5, lon: -88.19 },
-      { name: 'Antigua, Guatemala', lat: 14.56, lon: -90.73 },
+      [{ name: 'Mexico City, Mexico', lat: 19.43, lon: -99.13 }],
+      [{ name: 'Vancouver, Canada', lat: 49.28, lon: -123.12 }],
+      [{ name: 'Panama City, Panama', lat: 8.98, lon: -79.52 }],
+      [{ name: 'San José, Costa Rica', lat: 9.93, lon: -84.08 }],
+      [{ name: 'Punta Cana, Dominican Republic', lat: 18.58, lon: -68.37 }],
+      [{ name: 'Paris, France', lat: 48.86, lon: 2.35 }, { name: 'Madrid, Spain', lat: 40.42, lon: -3.70 }, { name: 'London, Britain', lat: 51.51, lon: -0.13 }],
+      [{ name: 'San Salvador, El Salvador', lat: 13.69, lon: -89.19 }, { name: 'Cusco, Peru', lat: -13.53, lon: -71.97 }],
+      [{ name: 'Siem Reap, Cambodia', lat: 13.36, lon: 103.86 }, { name: 'Hanoi, Vietnam', lat: 21.03, lon: 105.85 }, { name: 'Taipei, Taiwan', lat: 25.03, lon: 121.57 }],
+      [{ name: 'Zurich, Switzerland', lat: 47.38, lon: 8.54 }, { name: 'Munich, Germany', lat: 48.14, lon: 11.58 }, { name: 'Budapest, Hungary', lat: 47.50, lon: 19.04 }, { name: 'Prague, Czechia', lat: 50.08, lon: 14.44 }, { name: 'Vienna, Austria', lat: 48.21, lon: 16.37 }],
+      [{ name: 'Cairo, Egypt', lat: 30.04, lon: 31.24 }],
+      [{ name: 'Livingstone, Zambia', lat: -17.85, lon: 25.85 }],
+      [{ name: 'Bogotá, Colombia', lat: 4.71, lon: -74.07 }],
+      [{ name: 'Sydney, Australia', lat: -33.87, lon: 151.21 }],
+      [{ name: 'Rome, Italy', lat: 41.90, lon: 12.50 }, { name: 'Vatican City', lat: 41.90, lon: 12.45 }, { name: 'Amsterdam, Netherlands', lat: 52.37, lon: 4.90 }],
+      [{ name: 'Rio de Janeiro, Brazil', lat: -22.91, lon: -43.17 }, { name: 'Buenos Aires, Argentina', lat: -34.60, lon: -58.38 }, { name: 'Asunción, Paraguay', lat: -25.26, lon: -57.58 }],
+      [{ name: 'Ljubljana, Slovenia', lat: 46.05, lon: 14.51 }, { name: 'Dubrovnik, Croatia', lat: 42.65, lon: 18.09 }, { name: 'Kotor, Montenegro', lat: 42.42, lon: 18.77 }, { name: 'Mostar, Bosnia & Herzegovina', lat: 43.34, lon: 17.81 }, { name: 'Bratislava, Slovakia', lat: 48.15, lon: 17.11 }, { name: 'Kraków, Poland', lat: 50.06, lon: 19.94 }],
+      [{ name: 'Belize City, Belize', lat: 17.50, lon: -88.19 }, { name: 'Antigua, Guatemala', lat: 14.56, lon: -90.73 }],
     ]
+    const PLACES = TRIPS.flat()
     const toCell = (lat, lon) => [ (lon + 180) / 360 * COLS, (MAP.latMax - lat) / (MAP.latMax - MAP.latMin) * ROWS ]
     const home = toCell(SLC.lat, SLC.lon)
-    const trip = { i: -1, phase: 'idle', t0: 0, dur: 0, from: home, to: home, trail: [] }
+    // trip state: a list of waypoints (home, stops..., home); legs fly between consecutive ones
+    const trip = { i: -1, leg: 0, route: [], phase: 'idle', t0: 0, dur: 0, from: home, to: home, trail: [], current: null }
+    function startLeg(now) {
+      trip.from = trip.route[trip.leg]; trip.to = trip.route[trip.leg + 1]
+      trip.dur = 1400 + Math.hypot(trip.to[0] - trip.from[0], trip.to[1] - trip.from[1]) * 45
+      trip.phase = 'fly'; trip.t0 = now
+    }
     function nextTrip(now) {
       if (!TRIPS.length) return
       trip.i = (trip.i + 1) % TRIPS.length
-      const d = TRIPS[trip.i]
-      trip.from = home; trip.to = toCell(d.lat, d.lon)
-      trip.dur = 2200 + Math.hypot(trip.to[0] - home[0], trip.to[1] - home[1]) * 45
-      trip.phase = 'out'; trip.t0 = now
+      trip.route = [home, ...TRIPS[trip.i].map(d => toCell(d.lat, d.lon)), home]
+      trip.leg = 0; trip.trail.length = 0
+      startLeg(now)
     }
     function travelerPos(now) {
-      // quadratic-bezier arc bowed "up" (toward the pole), like a flight route
       const k = Math.min(1, (now - trip.t0) / trip.dur)
       const e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2
       const [ax, ay] = trip.from, [bx, by] = trip.to
@@ -1100,23 +1086,26 @@
     function stepTraveler(now) {
       if (!TRIPS.length || reduce) return
       if (trip.phase === 'idle') { if (now - trip.t0 > 1500) nextTrip(now); return }
-      const [, , k] = travelerPos(now)
-      if (k >= 1) {
-        if (trip.phase === 'out') { trip.phase = 'stay'; trip.t0 = now }
-        else if (trip.phase === 'back') { trip.phase = 'idle'; trip.t0 = now; trip.trail.length = 0 }
-      }
-      if (trip.phase === 'stay' && now - trip.t0 > 1800) { const f = trip.from; trip.from = trip.to; trip.to = f; trip.phase = 'back'; trip.t0 = now }
+      if (trip.phase === 'fly') {
+        const [, , k] = travelerPos(now)
+        if (k >= 1) {
+          trip.leg++
+          if (trip.leg >= trip.route.length - 1) { trip.phase = 'idle'; trip.t0 = now; trip.trail.length = 0 }
+          else { trip.phase = 'stay'; trip.t0 = now }
+        }
+      } else if (trip.phase === 'stay' && now - trip.t0 > 1600) startLeg(now)
     }
     function drawTraveler(now) {
       if (!TRIPS.length) return
       const g = Math.max(1, cell - 2)
-      // every place, very faint; the current one brighter
-      for (let i = 0; i < TRIPS.length; i++) {
-        const d = toCell(TRIPS[i].lat, TRIPS[i].lon)
-        ctx.fillStyle = i === trip.i && trip.phase !== 'idle' ? 'rgba(232,121,249,0.7)' : 'rgba(232,121,249,0.28)'
+      const active = trip.phase !== 'idle' ? TRIPS[trip.i] : null
+      for (let i = 0; i < PLACES.length; i++) {
+        const d = toCell(PLACES[i].lat, PLACES[i].lon)
+        const lit = active && active.includes(PLACES[i])
+        ctx.fillStyle = lit ? 'rgba(232,121,249,0.7)' : 'rgba(232,121,249,0.28)'
         ctx.fillRect(ox + Math.floor(d[0]) * cell + 1, oy + Math.floor(d[1]) * cell + 1, g, g)
       }
-      if (trip.phase === 'idle' || trip.phase === 'stay') return
+      if (trip.phase !== 'fly') return
       const [x, y] = travelerPos(now)
       const cx = Math.floor(x), cy = Math.floor(y)
       const last = trip.trail[trip.trail.length - 1]
