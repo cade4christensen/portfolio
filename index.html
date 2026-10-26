@@ -1032,7 +1032,7 @@
       if (!TRIPS.length) return
       trip.i = (trip.i + 1) % TRIPS.length
       trip.route = [home, ...TRIPS[trip.i].map(d => toCell(d.lat, d.lon)), home]
-      trip.leg = 0; trip.trail.length = 0
+      trip.leg = 0
       startLeg(now)
     }
     function travelerPos(now) {
@@ -1051,7 +1051,7 @@
         const [, , k] = travelerPos(now)
         if (k >= 1) {
           trip.leg++
-          if (trip.leg >= trip.route.length - 1) { trip.phase = 'idle'; trip.t0 = now; trip.trail.length = 0 }
+          if (trip.leg >= trip.route.length - 1) { trip.phase = 'idle'; trip.t0 = now }
           else { trip.phase = 'stay'; trip.t0 = now }
         }
       } else if (trip.phase === 'stay' && now - trip.t0 > 1600) startLeg(now)
@@ -1066,17 +1066,19 @@
         ctx.fillStyle = lit ? 'rgba(232,121,249,0.55)' : 'rgba(232,121,249,0.18)'
         ctx.fillRect(ox + Math.floor(d[0]) * cell + 1, oy + Math.floor(d[1]) * cell + 1, g, g)
       }
-      if (trip.phase === 'idle') return
       let cx = -1, cy = -1
       if (trip.phase === 'fly') {
         const [x, y] = travelerPos(now)
         cx = Math.floor(x); cy = Math.floor(y)
         const last = trip.trail[trip.trail.length - 1]
-        if (!last || last[0] !== cx || last[1] !== cy) { trip.trail.push([cx, cy]); if (trip.trail.length > 60) trip.trail.shift() }
+        if (!last || last[0] !== cx || last[1] !== cy) trip.trail.push([cx, cy, now])
       }
-      // the path stays on screen while the pixel pauses at a stop, and keeps trailing on the way home
+      // each cell of the path fades on its own clock, oldest first; nothing is ever cut off
+      const FADE = 9000
+      while (trip.trail.length && now - trip.trail[0][2] > FADE) trip.trail.shift()
       for (let i = 0; i < trip.trail.length; i++) {
-        const a = 0.03 + 0.25 * (i / trip.trail.length)
+        const age = (now - trip.trail[i][2]) / FADE
+        const a = 0.28 * (1 - age) * (1 - age)
         ctx.fillStyle = `rgba(232,121,249,${a})`
         ctx.fillRect(ox + trip.trail[i][0] * cell + 1, oy + trip.trail[i][1] * cell + 1, g, g)
       }
