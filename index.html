@@ -1145,6 +1145,19 @@
     let W = 0, H = 0, dpr = 1
     const colonies = []
     let total = 0
+    // occupancy grid at GRID resolution so chunks never overlap
+    let gc = 0, gr = 0, occ = null
+    function fits(x, y, s) {
+      const x0 = Math.max(0, x / GRID), y0 = Math.max(0, y / GRID)
+      const x1 = Math.min(gc, (x + s) / GRID), y1 = Math.min(gr, (y + s) / GRID)
+      for (let j = y0; j < y1; j++) for (let i = x0; i < x1; i++) if (occ[j * gc + i]) return false
+      return true
+    }
+    function mark(x, y, s, v) {
+      const x0 = Math.max(0, x / GRID), y0 = Math.max(0, y / GRID)
+      const x1 = Math.min(gc, (x + s) / GRID), y1 = Math.min(gr, (y + s) / GRID)
+      for (let j = y0; j < y1; j++) for (let i = x0; i < x1; i++) occ[j * gc + i] = v
+    }
 
     const sections = [...document.querySelectorAll('#hero .hero-content, #skills .container, #projects .container, #education .container, #contact .container')]
     const always = [...document.querySelectorAll('nav, #chat-panel, #chat-toggle')]
@@ -1175,6 +1188,8 @@
       canvas.width = Math.floor(W * dpr); canvas.height = Math.floor(H * dpr)
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
       colonies.length = 0; total = 0
+      gc = Math.ceil(W / GRID) + 1; gr = Math.ceil(H / GRID) + 1
+      occ = new Uint8Array(gc * gr)
     }
 
     function spawn() {
@@ -1185,9 +1200,11 @@
         y = side === 2 ? -20 : side === 3 ? H + 20 : Math.random() * H
       } else { x = Math.random() * W; y = Math.random() * H }
       const s = randSize()
-      if (hitsZone(x, y, s)) return
+      x = snap(x); y = snap(y)
+      if (hitsZone(x, y, s) || !fits(x, y, s)) return
+      mark(x, y, s, 1)
       const toward = Math.atan2(H / 2 - y, W / 2 - x)
-      const c = { id: colonies.length, chunks: [{ x: snap(x), y: snap(y), s }], phase: 'grow', alpha: 0,
+      const c = { id: colonies.length, chunks: [{ x, y, s }], phase: 'grow', alpha: 0,
                   color: PALETTE[Math.floor(Math.random() * PALETTE.length)],
                   limit: 60 + Math.floor(Math.random() * 200), speed: 4 + Math.random() * 8,
                   hold: 0, dir: toward + (Math.random() - 0.5) * 1.2 }
@@ -1200,13 +1217,13 @@
       if (alive < 14 && total < MAX_CHUNKS && Math.random() < 0.6) spawn()
       for (const c of colonies) {
         if (c.phase === 'dead') continue
-        c.alpha = Math.min(0.8, c.alpha + 0.07)
+        c.alpha = Math.min(0.92, c.alpha + 0.1)
         // flush anything sitting on the focused section / nav / chat
         if (zones.length) {
           let budget = 14
           for (let i = c.chunks.length - 1; i >= 0 && budget > 0; i--) {
             const k = c.chunks[i]
-            if (hitsZone(k.x, k.y, k.s)) { c.chunks.splice(i, 1); total--; budget-- }
+            if (hitsZone(k.x, k.y, k.s)) { mark(k.x, k.y, k.s, 0); c.chunks.splice(i, 1); total--; budget-- }
           }
         }
         if (c.phase === 'grow') {
@@ -1214,15 +1231,24 @@
           while (tries-- > 0 && c.chunks.length < c.limit && total < MAX_CHUNKS) {
             const n = c.chunks.length; if (!n) break
             const src = c.chunks[Math.random() < 0.7 ? n - 1 - Math.floor(Math.random() * Math.min(6, n)) : Math.floor(Math.random() * n)]
-            const s = randSize()
             const ang = Math.random() < 0.6 ? c.dir + (Math.random() - 0.5) * 1.8 : Math.random() * Math.PI * 2
-            // place the new chunk touching the source chunk's edge in that direction
-            const cx = src.x + src.s / 2 + Math.cos(ang) * (src.s / 2 + s / 2)
-            const cy = src.y + src.s / 2 + Math.sin(ang) * (src.s / 2 + s / 2)
-            const x = snap(cx - s / 2), y = snap(cy - s / 2)
-            if (x + s < -40 || y + s < -40 || x > W + 40 || y > H + 40) continue
-            if (hitsZone(x, y, s)) continue
-            c.chunks.push({ x, y, s }); total++
+            const dx = Math.cos(ang), dy = Math.sin(ang)
+            // snap the direction to one of the 4 sides of the source so the new chunk sits flush against it
+            const side = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 0 : 1) : (dy > 0 ? 2 : 3)
+            let s = randSize(), placed = false
+            while (s >= MIN_S && !placed) {
+              // slide along the shared edge by a random snapped offset
+              const off = snap((Math.random() - 0.5) * (src.s + s) * 0.8)
+              let x, y
+              if (side === 0) { x = src.x + src.s; y = src.y + off }
+              else if (side === 1) { x = src.x - s; y = src.y + off }
+              else if (side === 2) { x = src.x + off; y = src.y + src.s }
+              else { x = src.x + off; y = src.y - s }
+              if (x + s < 0 || y + s < 0 || x > W || y > H) break
+              if (!hitsZone(x, y, s) && fits(x, y, s)) { mark(x, y, s, 1); c.chunks.push({ x, y, s }); total++; placed = true }
+              else if (s <= MIN_S) break
+              else s = Math.max(MIN_S, snap(s / 2))
+            }
           }
           if (c.chunks.length >= c.limit || c.chunks.length === 0) { c.phase = 'hold'; c.hold = 6 + Math.floor(Math.random() * 24) }
           if (Math.random() < 0.2) c.dir += (Math.random() - 0.5) * 0.9
@@ -1230,7 +1256,7 @@
           if (--c.hold <= 0) c.phase = 'retract'
         } else if (c.phase === 'retract') {
           let n = Math.ceil(c.speed * 1.3)
-          while (n-- > 0 && c.chunks.length) { c.chunks.pop(); total-- }
+          while (n-- > 0 && c.chunks.length) { const k = c.chunks.pop(); mark(k.x, k.y, k.s, 0); total-- }
           if (!c.chunks.length) c.phase = 'dead'
         }
       }
@@ -1244,9 +1270,8 @@
         const [r, g, b] = c.color, n = c.chunks.length
         for (let i = 0; i < n; i++) {
           const k = c.chunks[i]
-          // bigger chunks are a little more transparent so text underneath stays legible
-          const sizeFade = 1 - 0.45 * Math.min(1, k.s / MAX_S)
-          const a = c.alpha * sizeFade * (0.55 + 0.45 * (i / n))
+          // crisp, nearly solid pixels; newest chunks brightest
+          const a = c.alpha * (0.7 + 0.3 * (i / n))
           ctx.fillStyle = `rgba(${r},${g},${b},${a})`
           ctx.fillRect(k.x + 1, k.y + 1, k.s - 2, k.s - 2)
         }
@@ -1262,7 +1287,7 @@
       requestAnimationFrame(loop)
     }
     resize()
-    for (let i = 0; i < 45; i++) step(performance.now() - 2000)
+    { const t0 = performance.now() - 3000; for (let i = 0; i < 60; i++) step(t0 + i * 40) }
     let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(resize, 150) })
     requestAnimationFrame(loop)
   })();
