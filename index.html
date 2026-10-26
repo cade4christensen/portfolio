@@ -1138,8 +1138,8 @@
     if (!canvas || reduce) { if (canvas) canvas.remove(); return }
     const ctx = canvas.getContext('2d')
     const STEP_MS = 30
-    const GRID = 4                    // everything snaps to this
-    const MIN_S = 4, MAX_S = 72       // chunk sizes (px); log-uniform so most are small, some are huge
+    const GRID = 8                    // everything snaps to this
+    const MIN_S = 8, MAX_S = 72       // chunk sizes (px); log-uniform so most are small, some are huge
     const MAX_CHUNKS = 4200
     const PALETTE = [[232,121,249],[192,132,252],[147,51,234],[129,140,248],[244,114,182]]
     let W = 0, H = 0, dpr = 1
@@ -1254,7 +1254,7 @@
           let fill = 4
           while (fill-- > 0 && c.chunks.length && c.chunks.length < c.limit && total < MAX_CHUNKS) {
             const src = c.chunks[Math.floor(Math.random() * c.chunks.length)]
-            const s = Math.random() < 0.6 ? MIN_S : MIN_S * 2
+            const s = Math.random() < 0.65 ? MIN_S : MIN_S * 2
             const side = Math.floor(Math.random() * 4)
             const off = snap(Math.random() * (src.s - s + GRID))
             let x, y
