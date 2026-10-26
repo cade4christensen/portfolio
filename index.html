@@ -1140,7 +1140,7 @@
     const STEP_MS = 30
     const GRID = 8                    // everything snaps to this
     const MIN_S = 8, MAX_S = 72       // chunk sizes (px); log-uniform so most are small, some are huge
-    const MAX_CHUNKS = 4200
+    const MAX_CHUNKS = 3600
     const PALETTE = [[232,121,249],[192,132,252],[147,51,234],[129,140,248],[244,114,182]]
     let W = 0, H = 0, dpr = 1
     const colonies = []
@@ -1206,7 +1206,7 @@
       const toward = Math.atan2(H / 2 - y, W / 2 - x)
       const c = { id: colonies.length, chunks: [{ x, y, s }], phase: 'grow', alpha: 0,
                   color: PALETTE[Math.floor(Math.random() * PALETTE.length)],
-                  limit: 120 + Math.floor(Math.random() * 300), speed: 6 + Math.random() * 10,
+                  limit: 500 + Math.floor(Math.random() * 700), speed: 10 + Math.random() * 14,
                   hold: 0, dir: toward + (Math.random() - 0.5) * 1.2 }
       total++; colonies.push(c)
     }
@@ -1214,7 +1214,7 @@
     function step(now) {
       refreshZones(now)
       const alive = colonies.filter(c => c.phase !== 'dead').length
-      if (alive < 14 && total < MAX_CHUNKS && Math.random() < 0.6) spawn()
+      if (alive < 3 && total < MAX_CHUNKS && Math.random() < 0.25) spawn()
       for (const c of colonies) {
         if (c.phase === 'dead') continue
         c.alpha = Math.min(0.92, c.alpha + 0.1)
@@ -1251,7 +1251,7 @@
             }
           }
           // fill gaps: small chunks tucked against random existing ones
-          let fill = 4
+          let fill = 10
           while (fill-- > 0 && c.chunks.length && c.chunks.length < c.limit && total < MAX_CHUNKS) {
             const src = c.chunks[Math.floor(Math.random() * c.chunks.length)]
             const s = Math.random() < 0.65 ? MIN_S : MIN_S * 2
@@ -1265,7 +1265,7 @@
             if (x < 0 || y < 0 || x + s > W || y + s > H) continue
             if (!hitsZone(x, y, s) && fits(x, y, s)) { mark(x, y, s, 1); c.chunks.push({ x, y, s }); total++ }
           }
-          if (c.chunks.length >= c.limit || c.chunks.length === 0) { c.phase = 'hold'; c.hold = 6 + Math.floor(Math.random() * 24) }
+          if (c.chunks.length >= c.limit || c.chunks.length === 0) { c.phase = 'hold'; c.hold = 15 + Math.floor(Math.random() * 40) }
           if (Math.random() < 0.2) c.dir += (Math.random() - 0.5) * 0.9
         } else if (c.phase === 'hold') {
           if (--c.hold <= 0) c.phase = 'retract'
