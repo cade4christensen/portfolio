@@ -1115,18 +1115,24 @@
         ctx.fillStyle = lit ? 'rgba(232,121,249,0.7)' : 'rgba(232,121,249,0.28)'
         ctx.fillRect(ox + Math.floor(d[0]) * cell + 1, oy + Math.floor(d[1]) * cell + 1, g, g)
       }
-      if (trip.phase !== 'fly') return
-      const [x, y] = travelerPos(now)
-      const cx = Math.floor(x), cy = Math.floor(y)
-      const last = trip.trail[trip.trail.length - 1]
-      if (!last || last[0] !== cx || last[1] !== cy) { trip.trail.push([cx, cy]); if (trip.trail.length > 28) trip.trail.shift() }
+      if (trip.phase === 'idle') return
+      let cx = -1, cy = -1
+      if (trip.phase === 'fly') {
+        const [x, y] = travelerPos(now)
+        cx = Math.floor(x); cy = Math.floor(y)
+        const last = trip.trail[trip.trail.length - 1]
+        if (!last || last[0] !== cx || last[1] !== cy) { trip.trail.push([cx, cy]); if (trip.trail.length > 60) trip.trail.shift() }
+      }
+      // the path stays on screen while the pixel pauses at a stop, and keeps trailing on the way home
       for (let i = 0; i < trip.trail.length; i++) {
         const a = 0.05 + 0.35 * (i / trip.trail.length)
         ctx.fillStyle = `rgba(232,121,249,${a})`
         ctx.fillRect(ox + trip.trail[i][0] * cell + 1, oy + trip.trail[i][1] * cell + 1, g, g)
       }
-      ctx.fillStyle = 'rgba(241,240,255,0.75)'
-      ctx.fillRect(ox + cx * cell + 1, oy + cy * cell + 1, g, g)
+      if (cx >= 0) {
+        ctx.fillStyle = 'rgba(241,240,255,0.75)'
+        ctx.fillRect(ox + cx * cell + 1, oy + cy * cell + 1, g, g)
+      }
     }
 
     let W = 0, H = 0, dpr = 1, cell = 6, ox = 0, oy = 0
