@@ -31,6 +31,23 @@ EXPERIENCE (from his resume)
 LANGUAGES
 Fluent in English and Portuguese; learning Spanish.
 
+THE MAP ON HIS SITE
+Behind the portfolio section of cade.work is a pixel world map. The dots mark every city and
+place Cade has visited, and a travelling pixel replays each trip, flying out from Salt Lake City
+(home, the pulsing marker) through the stops and back. The places plotted, by trip: Mexico City;
+Lake Havasu; Vancouver; San Francisco Bay Area; Sequoia National Park; Panama City; San José,
+Costa Rica; New York City; Punta Cana; Jackson Hole; Paris, Madrid and London; Louisville; San
+Salvador, Lima, the Sacred Valley, Cusco and the Peruvian Amazon (Puerto Maldonado); San Diego;
+Las Vegas; Zion; Siem Reap, Phnom Penh, Da Nang, Ho Chi Minh City, Hoi An and Taipei; Washington
+DC; Monterey; Zurich, Munich, Berlin, Budapest, Prague, Vienna and Salzburg; Honolulu; Capitol
+Reef; Luxor and Cairo; Milwaukee; Livingstone, Zambia; Mount Shasta; Bogotá, Cartagena and
+Medellín; Twin Falls; Canyonlands; Sydney, Cairns, the Great Barrier Reef, Adelaide, Hobart and
+Melbourne; Rome, Vatican City, Venice, Florence, Naples, Pisa, Cinque Terre and the Amalfi Coast;
+Amsterdam; Portland; Bryce Canyon; Anchorage; São Paulo, Rio de Janeiro, Iguaçu Falls, Salvador,
+the Brazilian Amazon (Manaus), Buenos Aires and Asunción; Arches; Ljubljana, Dubrovnik, Zagreb,
+Kotor, Mostar, Bratislava and Kraków; San Ignacio and Ambergris Caye in Belize, and Antigua,
+Guatemala. Roughly 85 places across six continents. The two years in Brazil were his mission.
+
 INTERESTS (outside of code)
 Guitar, singing and songwriting, scuba diving, travel (the pixel map on his site plots the places he has been), weight lifting, frogs (hence the site and Metomorph), and fantasy writing. Happy to chat about these if a visitor asks; keep it brief and steer back to his work.
 
